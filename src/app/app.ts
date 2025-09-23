@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { NxWelcome } from './nx-welcome';
+import { DialogModule } from 'primeng/dialog';
 
 @Component({
-  imports: [NxWelcome, RouterModule],
+  imports: [RouterModule, DialogModule],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.css',
