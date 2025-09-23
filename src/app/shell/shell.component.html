@@ -116,25 +116,62 @@
           <div class="messages">
             @if (activeChat()) {
               @for (m of activeChat()!.messages; track $index) {
-                <div class="msg" [ngClass]="{'user': m.from==='user', 'agent': m.from==='agent'}">
-                  <div class="bubble">{{ m.text }}</div>
+                <div class="message-container" [ngClass]="{'user': m.from==='user', 'agent': m.from==='agent'}">
+                  @if (m.from === 'agent') {
+                    <div class="message-avatar">
+                      <div class="avatar-circle">
+                        {{ currentAgent()?.name?.[0] | uppercase }}
+                      </div>
+                    </div>
+                  }
+                  <div class="message-content">
+                    <div class="message-bubble" [ngClass]="{'user-bubble': m.from==='user', 'agent-bubble': m.from==='agent'}">
+                      <div class="message-text">{{ m.text }}</div>
+                    </div>
+                    @if (m.from === 'agent') {
+                      <div class="message-actions">
+                        <button class="action-btn" title="Másolás">
+                          <i class="pi pi-copy"></i>
+                        </button>
+                        <button class="action-btn" title="Tökéletes">
+                          <i class="pi pi-thumbs-up"></i>
+                        </button>
+                        <button class="action-btn" title="Nem jó">
+                          <i class="pi pi-thumbs-down"></i>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                  @if (m.from === 'user') {
+                    <div class="message-avatar user-avatar">
+                      <div class="avatar-circle user-avatar-circle">
+                        <i class="pi pi-user"></i>
+                      </div>
+                    </div>
+                  }
                 </div>
               }
             } @else {
-              <div class="hint" style="padding:12px">Válassz beszélgetést bal oldalt vagy írj üzenetet új thread indításához.</div>
+              <div class="empty-state">
+                <div class="empty-icon">
+                  <i class="pi pi-comments" style="font-size: 3rem; color: var(--muted);"></i>
+                </div>
+                <div class="empty-text">Válassz beszélgetést bal oldalt vagy írj üzenetet új thread indításához.</div>
+              </div>
             }
           </div>
-          <div class="composer">
+          <div class="composer" style="position:relative;">
             <textarea pTextarea 
               placeholder="Írj üzenetet az aktív munkatársnak…" 
               #composer 
               aria-label="Üzenet"
               [disabled]="!currentAgent() || isLoadingSendMessage()"></textarea>
             <button pButton 
-              [label]="isLoadingSendMessage() ? 'Küldés...' : 'Küldés'" 
+              
               class="p-button-sm accent  button--bordered" 
+              style="position:absolute; right: 30px; bottom: 25px; height: 40px; width: 40px; border-radius: 50%;"
               (click)="sendMessage(composer)"
-              [disabled]="!currentAgent() || isLoadingSendMessage()"></button>
+              [disabled]="!currentAgent() || isLoadingSendMessage()"> <i class="pi pi-send" style="color: black"></i></button>
           </div>
         </div>
       </div>
@@ -193,7 +230,17 @@
               <span>Erőforrások</span>
               <button pButton icon="pi pi-plus" class="p-button-text p-button-sm" title="Új erőforrás" aria-label="Új erőforrás" (click)="addResource()"></button>
             </h3>
-            <div class="body">
+            <div class="body"
+                 (dragover)="onDragOver($event, 'resources')"
+                 (dragleave)="onDragLeave($event)"
+                 (drop)="onDrop($event, 'resources')"
+                 [class.drag-over]="isDragOver() && dragOverSection() === 'resources'">
+              @if (isDragOver() && dragOverSection() === 'resources') {
+                <div class="drop-zone-hint">
+                  <i class="pi pi-cloud-upload" style="font-size: 1.5rem; color: var(--accent-2);"></i>
+                  <p>Húzd ide a txt fájlokat (max 5MB)</p>
+                </div>
+              }
               @for (i of currentAgent()!.settings?.resources; track i.title) {
                 <div class="chip-container">
                   <span class="chip" [class.new-chip]="i.isNew === true">{{ i.title }}</span>

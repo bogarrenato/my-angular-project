@@ -379,44 +379,223 @@ header {
   gap: 10px; 
 }
 
-.msg { 
-  display: flex; 
-  gap: 10px; 
+/* Modern Chat Message Styles */
+.message-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: flex-start;
 }
 
-.bubble { 
-  padding: 10px 12px; 
-  border-radius: 12px; 
-  max-width: 75%; 
+.message-container.user {
+  flex-direction: row-reverse;
 }
 
-.msg.user .bubble { 
-  margin-left: auto; 
-  background: linear-gradient(180deg, #1d263a, #121a2c); 
-  border: 1px solid #2a3650; 
+.message-avatar {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
 }
 
-.msg.agent .bubble { 
-  background: linear-gradient(180deg, #122038, #0f172a); 
-  border: 1px solid #2a3650; 
+.avatar-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent-1));
+  color: white;
+  border: 2px solid var(--surface-border);
+}
+
+.user-avatar-circle {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  font-size: 14px;
+}
+
+.message-content {
+  flex: 1;
+  max-width: calc(100% - 44px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.message-bubble {
+  padding: 12px 16px;
+  border-radius: 18px;
+  max-width: 100%;
+  word-wrap: break-word;
+  line-height: 1.5;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.agent-bubble {
+  background: linear-gradient(180deg, #122038, #0f172a);
+  border: 1px solid #2a3650;
+  border-bottom-left-radius: 4px;
+  color: #e2e8f0;
+}
+
+.user-bubble {
+  background: linear-gradient(180deg, #1d263a, #121a2c);
+  border: 1px solid #2a3650;
+  border-bottom-right-radius: 4px;
+  color: #f1f5f9;
+  margin-left: auto;
+  max-width: 80%;
+}
+
+.message-text {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.message-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.message-container:hover .message-actions {
+  opacity: 1;
+}
+
+.action-btn {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.action-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-icon {
+  margin-bottom: 16px;
+}
+
+.empty-text {
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 .composer { 
   display: flex; 
-  gap: 8px; 
-  padding: 10px; 
-  border-top: 1px solid var(--border); 
+  gap: 12px; 
+  padding: 16px 20px; 
+  border-top: 1px solid var(--border);
+  background: var(--surface-ground);
+  border-radius: 0 0 12px 12px;
+  align-items: flex-end;
 }
 
-.composer textarea { 
-  flex: 1; 
-  resize: none; 
-  height: 60px; 
-  border-radius: 10px; 
-  border: 1px solid var(--border); 
-  background: var(--panel-2); 
-  color: var(--text); 
-  padding: 10px; 
+.composer textarea {
+  flex: 1;
+  min-height: 44px;
+  max-height: 120px;
+  border-radius: 22px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-card);
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  transition: all 0.2s ease;
+}
+
+.composer textarea:focus {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 2px rgba(var(--accent-2-rgb), 0.1);
+  outline: none;
+}
+
+.composer button {
+  border-radius: 22px;
+  padding: 12px 20px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.composer button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced message animations */
+.message-container {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Typing indicator for agent messages */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-10px);
+  }
 }
 
 /* Right: settings */

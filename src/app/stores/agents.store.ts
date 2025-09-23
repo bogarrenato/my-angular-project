@@ -336,7 +336,7 @@ export class AgentsStore {
     }, 600);
   }
 
-  addResource(resource: { name: string; folder: string; files: string[]; fileTypes: string[] }): void {
+  addResource(resource: { name: string; folder: string; files: string[]; fileContents?: { name: string; content: string; size: number }[]; fileTypes: string[] }): void {
     const currentAgent = this.currentAgent();
     if (!currentAgent || !currentAgent.settings) return;
 
@@ -349,7 +349,11 @@ export class AgentsStore {
           { 
             title: resource.name, 
             note: `${resource.files.length} fájl, ${resource.fileTypes.join(', ')}`,
-            config: JSON.stringify({ folder: resource.folder, files: resource.files }),
+            config: JSON.stringify({ 
+              folder: resource.folder, 
+              files: resource.files,
+              fileContents: resource.fileContents || []
+            }),
             isNew: true
           }
         ]

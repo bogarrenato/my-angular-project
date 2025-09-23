@@ -3,7 +3,6 @@ import {
   Component,
   signal,
   inject,
-  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
@@ -28,7 +27,7 @@ import { InstructionDialogComponent } from '../dialogs/instruction-dialog.compon
 import { DeleteConfirmationDialogComponent } from '../dialogs/delete-confirmation-dialog.component';
 import { AppDialogComponent } from '../dialogs/app-dialog.component';
 import { ResourceDialogComponent } from '../dialogs/resource-dialog.component';
-import { Subject, take, takeUntil } from 'rxjs';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-shell',
@@ -91,6 +90,10 @@ export class ShellComponent {
   readonly showAgentModal = signal(false);
   readonly showItemModal = signal(false);
   addItemTarget: 'instruction' | 'app' | 'resource' = 'instruction';
+  
+  // Drag and drop state
+  readonly isDragOver = signal(false);
+  readonly dragOverSection = signal<string | null>(null);
 
   constructor() {
     // Load initial data
@@ -196,7 +199,7 @@ export class ShellComponent {
         resizable: false,
         styleClass: 'delete-confirmation-dialog modern-modal',
         data: { instructionTitle: resourceTitle },
-        transitionOptions: '300ms cubic-bezier(0.25, 0.8, 0.25, 1)',
+        transitionOptions: '500ms cubic-bezier(0.25, 0.8, 0.25, 1)',
         dismissableMask: true,
         focusOnShow: true,
         keepInViewport: true,
@@ -289,5 +292,85 @@ export class ShellComponent {
 
     await this.agentsStore.sendMessage(txt);
     textarea.value = '';
+  }
+
+  // Drag and drop methods
+  onDragOver(event: DragEvent, section: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver.set(true);
+    this.dragOverSection.set(section);
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver.set(false);
+    this.dragOverSection.set(null);
+  }
+
+  async onDrop(event: DragEvent, section: string): Promise<void> {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver.set(false);
+    this.dragOverSection.set(null);
+
+    const files = event.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+
+    // Only handle drops in the resources section
+    if (section === 'resources') {
+      await this.handleFileDrop(Array.from(files));
+    }
+  }
+
+  private async handleFileDrop(files: File[]): Promise<void> {
+    // Filter txt files with 5MB limit
+    const validFiles = files.filter(file => {
+      const extension = file.name.split('.').pop()?.toLowerCase();
+      return extension === 'txt' && file.size <= 5 * 1024 * 1024;
+    });
+
+    if (validFiles.length === 0) {
+      console.warn('No valid txt files found (max 5MB)');
+      return;
+    }
+
+    // Read file contents
+    const fileContents: { name: string; content: string; size: number }[] = [];
+    
+    for (const file of validFiles) {
+      try {
+        const content = await this.readFileAsText(file);
+        fileContents.push({
+          name: file.name,
+          content: content,
+          size: file.size
+        });
+      } catch (error) {
+        console.error(`Error reading file ${file.name}:`, error);
+      }
+    }
+
+    // Create resource with file contents
+    const resourceName = `Feltöltött fájlok (${fileContents.length})`;
+    const resource = {
+      name: resourceName,
+      folder: '/uploaded',
+      files: fileContents.map(fc => fc.name),
+      fileContents: fileContents,
+      fileTypes: ['text']
+    };
+
+    this.agentsStore.addResource(resource);
+  }
+
+  private readFileAsText(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string || '');
+      reader.onerror = (e) => reject(e);
+      reader.readAsText(file, 'UTF-8');
+    });
   }
 }

@@ -26,8 +26,8 @@ interface FileType {
   ],
   template: `
     <div class="resource-dialog">
-      <div class="grid formgrid p-fluid">
-        <div class="field col-12">
+      <div class="  p-fluid">
+        <div class="field ">
           <label for="resourceName" class="text-sm font-medium">Erőforrás megnevezése</label>
           <input 
             id="resourceName" 
@@ -129,6 +129,7 @@ interface FileType {
           pButton 
           label="Mégse" 
           icon="pi pi-times" 
+          style="border-radius: 8px; padding: 10px;"
           class="p-button-text" 
           (click)="onCancel()">
         </button>
@@ -136,6 +137,7 @@ interface FileType {
           pButton 
           label="Hozzáadás" 
           icon="pi pi-check" 
+          style="border-radius: 8px; padding: 10px;"
           class="p-button-success" 
           (click)="onSave()"
           [disabled]="!name.trim() || selectedFiles.length === 0">
@@ -312,7 +314,7 @@ export class ResourceDialogComponent {
     
     const filteredFiles = files.filter(file => {
       const extension = file.name.split('.').pop()?.toLowerCase();
-      return allowedTypes.some(type => {
+      const isValidType = allowedTypes.some(type => {
         switch (type) {
           case 'excel': return ['xlsx', 'xls'].includes(extension || '');
           case 'word': return ['docx', 'doc'].includes(extension || '');
@@ -323,6 +325,12 @@ export class ResourceDialogComponent {
           default: return false;
         }
       });
+      
+      // Check file size - 5MB limit for txt files, 10MB for others
+      const maxSize = extension === 'txt' ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+      const isValidSize = file.size <= maxSize;
+      
+      return isValidType && isValidSize;
     });
     
     this.selectedFiles = [...this.selectedFiles, ...filteredFiles];
@@ -341,13 +349,39 @@ export class ResourceDialogComponent {
     this.ref.close();
   }
 
-  onSave(): void {
+  async onSave(): Promise<void> {
+    // Read file contents
+    const fileContents: { name: string; content: string; size: number }[] = [];
+    
+    for (const file of this.selectedFiles) {
+      try {
+        const content = await this.readFileAsText(file);
+        fileContents.push({
+          name: file.name,
+          content: content,
+          size: file.size
+        });
+      } catch (error) {
+        console.error(`Error reading file ${file.name}:`, error);
+      }
+    }
+    
     const result = {
       name: this.name,
       folder: this.selectedFolder,
       files: this.selectedFiles.map(f => f.name),
+      fileContents: fileContents,
       fileTypes: this.fileTypes.filter(ft => ft.checked).map(ft => ft.value)
     };
     this.ref.close(result);
+  }
+
+  private readFileAsText(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string || '');
+      reader.onerror = (e) => reject(e);
+      reader.readAsText(file, 'UTF-8');
+    });
   }
 }
