@@ -200,6 +200,50 @@ section {
 /* Right aside - takes remaining space */
 aside:last-of-type {
   flex: 1;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+}
+
+/* Right aside when closed */
+aside:last-of-type.right-aside-closed {
+  width: 0;
+  min-width: 0;
+  max-width: 0;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  flex: 0;
+}
+
+/* Right aside when open */
+aside:last-of-type.right-aside-open {
+  width: auto;
+  min-width: 300px;
+  max-width: 400px;
+  opacity: 1;
+  flex: 1;
+}
+
+/* Responsive behavior for right aside */
+@media (max-width: 1200px) {
+  aside:last-of-type.right-aside-open {
+    min-width: 250px;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 900px) {
+  aside:last-of-type.right-aside-open {
+    position: fixed;
+    top: 58px; /* Header height */
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    min-width: 280px;
+    max-width: 320px;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+  }
 }
 
 /* Three-column grid - keeping for compatibility */

@@ -91,6 +91,9 @@ export class ShellComponent {
   readonly showItemModal = signal(false);
   addItemTarget: 'instruction' | 'app' | 'resource' = 'instruction';
   
+  // Right aside toggle state
+  readonly isRightAsideOpen = signal(false);
+  
   // Drag and drop state
   readonly isDragOver = signal(false);
   readonly dragOverSection = signal<string | null>(null);
@@ -276,6 +279,10 @@ export class ShellComponent {
 
   toggleTheme() {
     this.themeStore.toggleTheme();
+  }
+
+  toggleRightAside() {
+    this.isRightAsideOpen.update(open => !open);
   }
 
   setActiveAgent(id: string) {
