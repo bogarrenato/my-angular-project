@@ -12,7 +12,6 @@
       "
     >
       <div class="brand" title="AI HUB">
-        <span class="flame" aria-hidden="true"></span>
         <div>
           <h1>AI HUB • SimplyFire AI HUB</h1>
           <small
@@ -43,7 +42,7 @@
       display: flex;
       flex-direction: row;
       gap: 10px;
-      max-width: 1280px;
+
       margin-left: auto;
       margin-right: auto;
     "
@@ -51,110 +50,121 @@
     <!-- LEFT: Munkatársak + Lenyíló beszélgetések -->
     <aside
       class="panel"
-      style="max-width: 500 px; width: 500px"
+      style="max-width: 500 px; width: 500px; flex: 1;"
       id="leftCol"
       aria-label="Munkatársak panel"
     >
-      <h2>
-        <span>Munkatársak</span>
-        <button
-          pButton
-          icon="pi pi-plus"
-          class="p-button-text p-button-sm"
-          (click)="showAgentModal.set(true)"
-          aria-label="Új almunkatárs"
-        ></button>
-      </h2>
-      <div class="content">
-        <div
-          class="list"
-          id="agentList"
-          role="listbox"
-          aria-label="Munkatárs lista"
-        >
-          @if (isLoadingAgents()) {
-          <div class="flex flex-column gap-2">
-            <div class="agent" style="opacity: 0.6">
-              <div class="av">⏳</div>
-              <div class="meta">
-                <div class="title">Betöltés...</div>
-                <div class="sub">Munkatársak betöltése folyamatban</div>
-              </div>
-            </div>
-          </div>
-          } @else {
-          <div class="flex flex-column gap-2">
-            @for (a of agents(); track a.id) {
-            <div
-              class="agent"
-              (click)="setActiveAgent(a.id)"
-              [attr.aria-label]="'Munkatárs: ' + a.name"
-              tabindex="0"
-            >
-              <div class="av">{{ a.name?.[0] | uppercase }}</div>
-              <div class="meta">
-                <div class="title">{{ a.name }}</div>
-                <div class="sub">
-                  {{ a.role }}@if (a.fixed) { • nem törölhető}
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          padding-left: 14px;
+        "
+      >
+        <span class="flame" aria-hidden="true"></span>
+        <input
+          pInputText
+          style="
+            height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0 10px;
+          "
+          type="text"
+          placeholder="Keresés a beszélgetésekben…"
+          aria-label="Keresés"
+        />
+        <h2>
+          <span>Előzmények</span>
+        </h2>
+        <div class="content">
+          <div
+            class="list"
+            id="agentList"
+            role="listbox"
+            aria-label="Munkatárs lista"
+          >
+            @if (isLoadingAgents()) {
+            <div class="flex flex-column gap-2">
+              <div class="agent" style="opacity: 0.6">
+                <div class="av">⏳</div>
+                <div class="meta">
+                  <div class="title">Betöltés...</div>
+                  <div class="sub">Munkatársak betöltése folyamatban</div>
                 </div>
               </div>
-              @if (a.fixed) {
-              <span class="badge">FŐ</span>
-              }
             </div>
-            <!-- Accordion panel for chats of this agent -->
-            @if (a.id === activeAgentId()) {
-            <div class="agent-panel open">
-              <div class="search">
-                <input
-                  pInputText
-                  type="text"
-                  placeholder="Keresés a beszélgetésekben…"
-                  aria-label="Keresés"
-                />
-              </div>
-              <div class="items">
-                @if (isLoadingChats()) {
-                <div class="hint">Beszélgetések betöltése...</div>
-                } @else { @for (c of agentChats(); track c.id) {
-                <div
-                  class="itm"
-                  [class.active]="activeChat()?.id === c.id"
-                  (click)="setActiveChatForAgent(a.id, c.id)"
-                >
-                  <strong>{{ c.title }}</strong>
-                  <small>{{ c.ts }}</small>
-                  <div class="hint">{{ c.preview }}</div>
+            } @else {
+            <div class="flex flex-column gap-2">
+              @for (a of agents(); track a.id) {
+              <div
+                class="agent"
+                (click)="setActiveAgent(a.id)"
+                [attr.aria-label]="'Munkatárs: ' + a.name"
+                tabindex="0"
+              >
+                <div class="av">{{ a.name?.[0] | uppercase }}</div>
+                <div class="meta">
+                  <div class="title">{{ a.name }}</div>
+                  <div class="sub">
+                    {{ a.role }}@if (a.fixed) { • nem törölhető}
+                  </div>
                 </div>
-                } @if (!agentChats().length) {
-                <div class="hint">Ehhez a munkatárshoz nincs beszélgetés.</div>
-                } }
+                @if (a.fixed) {
+                <span class="badge">FŐ</span>
+                }
               </div>
+              <!-- Accordion panel for chats of this agent -->
+              @if (a.id === activeAgentId()) {
+              <div class="agent-panel open">
+                <div class="search"></div>
+                <div class="items">
+                  @if (isLoadingChats()) {
+                  <div class="hint">Beszélgetések betöltése...</div>
+                  } @else { @for (c of agentChats(); track c.id) {
+                  <div
+                    class="itm"
+                    [class.active]="activeChat()?.id === c.id"
+                    (click)="setActiveChatForAgent(a.id, c.id)"
+                  >
+                    <strong>{{ c.title }}</strong>
+                    <small>{{ c.ts }}</small>
+                    <div class="hint">{{ c.preview }}</div>
+                  </div>
+                  } @if (!agentChats().length) {
+                  <div class="hint">
+                    Ehhez a munkatárshoz nincs beszélgetés.
+                  </div>
+                  } }
+                </div>
+              </div>
+              } }
             </div>
-            } }
+            }
           </div>
-          }
+          <div
+            class="plus"
+            (click)="showAgentModal.set(true)"
+            role="button"
+            style="margin-top: 10px"
+            tabindex="0"
+            aria-label="Almunkatárs hozzáadása"
+          >
+            <strong>＋ Almunkatárs hozzáadása</strong>
+          </div>
+          <p class="hint">
+            Kattints egy munkatársra a beszélgetéseinek megnyitásához. Egyszerre
+            csak egy munkatárs lehet lenyitva.
+          </p>
         </div>
-        <div
-          class="plus"
-          (click)="showAgentModal.set(true)"
-          role="button"
-          tabindex="0"
-          aria-label="Almunkatárs hozzáadása"
-        >
-          <strong>＋ Almunkatárs hozzáadása</strong>
-        </div>
-        <p class="hint">
-          Kattints egy munkatársra a beszélgetéseinek megnyitásához. Egyszerre
-          csak egy munkatárs lehet lenyitva.
-        </p>
       </div>
     </aside>
 
     <!-- CENTER: Csak thread + composer -->
-    <section class="panel" aria-label="Csevegő konzol">
+    <section class="panel" aria-label="Csevegő konzol" style="flex: 2;">
       <div class="chatwrap">
-        <div class="chat-header">
+        <!-- <div class="chat-header">
           <div>
             @if (currentAgent()) {
             <div class="pill">Aktív: {{ currentAgent()!.name }}</div>
@@ -201,7 +211,7 @@
             ></button>
           </div>
           }
-        </div>
+        </div> -->
 
         <!-- Thread -->
         <div class="thread" aria-live="polite">
@@ -271,6 +281,7 @@
               pTextarea
               placeholder="Írj üzenetet az aktív munkatársnak…"
               #composer
+              style="height: 124px"
               aria-label="Üzenet"
               [disabled]="!currentAgent() || isLoadingSendMessage()"
             ></textarea>
@@ -296,7 +307,7 @@
     </section>
 
     <!-- RIGHT: Settings (per active agent) -->
-    <aside class="panel" aria-label="Munkatárs beállítások">
+    <aside class="panel" aria-label="Munkatárs beállítások" style="flex: 1;">
       <h2>
         <span>Munkatárs beállítások</span>
         <span class="pill">{{ agents().length }} munkatárs</span>
