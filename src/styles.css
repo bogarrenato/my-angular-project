@@ -632,7 +632,9 @@ aside:last-of-type.right-aside-open {
 
 .composer {
   display: flex;
+  align-items: center;
   gap: 12px;
+  /* max-width: 800px; */
   padding: 16px 20px;
   /* border-top: 1px solid var(--border); */
   /* background: var(--surface-ground); */
