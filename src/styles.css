@@ -634,7 +634,7 @@ aside:last-of-type.right-aside-open {
   display: flex;
   gap: 12px;
   padding: 16px 20px;
-  border-top: 1px solid var(--border);
+  /* border-top: 1px solid var(--border); */
   /* background: var(--surface-ground); */
   border-radius: 0 0 12px 12px;
   align-items: flex-end;
