@@ -1,85 +1,153 @@
 <div class="app">
   <!-- Header -->
   <header aria-label="Oldal fejléc">
-    <div class="brand" title="AI HUB">
-      <span class="flame" aria-hidden="true"></span>
-      <div>
-        <h1>AI HUB • SimplyFire AI HUB</h1>
-        <small>Modell‑, eszköz‑ és konnektorfüggetlen MI agent keretrendszer</small>
+    <div
+      style="
+        max-width: 1280px;
+        margin: auto;
+        display: flex;
+        width: id;
+        width: 100%;
+        justify-content: space-between;
+      "
+    >
+      <div class="brand" title="AI HUB">
+        <span class="flame" aria-hidden="true"></span>
+        <div>
+          <h1>AI HUB • SimplyFire AI HUB</h1>
+          <small
+            >Modell‑, eszköz‑ és konnektorfüggetlen MI agent
+            keretrendszer</small
+          >
+        </div>
       </div>
-    </div>
-    <div class="actions">
-      <button pButton type="button" label="Regisztráció" class="p-button-outlined p-button-sm"></button>
-      <button pButton type="button" label="Bejelentkezés" class="p-button-sm accent button--bordered" iconPos="right" ></button>
-      <button pButton type="button" class="p-button-text p-button-rounded" [icon]="themeIcon()" (click)="toggleTheme()" [attr.aria-label]="themeLabel()"></button>
+      <div class="actions">
+        <!--       <button pButton type="button" label="Regisztráció" class="p-button-outlined p-button-sm"></button>
+      <button pButton type="button" label="Bejelentkezés" class="p-button-sm accent button--bordered" iconPos="right" ></button> -->
+        <button
+          pButton
+          type="button"
+          class="p-button-text p-button-rounded"
+          [icon]="themeIcon()"
+          (click)="toggleTheme()"
+          [attr.aria-label]="themeLabel()"
+        ></button>
+      </div>
     </div>
   </header>
 
   <!-- Main grid: Left (agents + accordion chats), Center (thread), Right (settings) -->
-  <main class="grid">
+  <main
+    class=""
+    style="
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      max-width: 1280px;
+      margin-left: auto;
+      margin-right: auto;
+    "
+  >
     <!-- LEFT: Munkatársak + Lenyíló beszélgetések -->
-    <aside class="panel" id="leftCol" aria-label="Munkatársak panel">
+    <aside
+      class="panel"
+      style="max-width: 500 px; width: 500px"
+      id="leftCol"
+      aria-label="Munkatársak panel"
+    >
       <h2>
         <span>Munkatársak</span>
-        <button pButton icon="pi pi-plus" class="p-button-text p-button-sm" (click)="showAgentModal.set(true)" aria-label="Új almunkatárs"></button>
+        <button
+          pButton
+          icon="pi pi-plus"
+          class="p-button-text p-button-sm"
+          (click)="showAgentModal.set(true)"
+          aria-label="Új almunkatárs"
+        ></button>
       </h2>
       <div class="content">
-        <div class="list" id="agentList" role="listbox" aria-label="Munkatárs lista">
+        <div
+          class="list"
+          id="agentList"
+          role="listbox"
+          aria-label="Munkatárs lista"
+        >
           @if (isLoadingAgents()) {
-            <div class="flex flex-column gap-2">
-              <div class="agent" style="opacity: 0.6;">
-                <div class="av">⏳</div>
-                <div class="meta">
-                  <div class="title">Betöltés...</div>
-                  <div class="sub">Munkatársak betöltése folyamatban</div>
-                </div>
+          <div class="flex flex-column gap-2">
+            <div class="agent" style="opacity: 0.6">
+              <div class="av">⏳</div>
+              <div class="meta">
+                <div class="title">Betöltés...</div>
+                <div class="sub">Munkatársak betöltése folyamatban</div>
               </div>
             </div>
+          </div>
           } @else {
-            <div class="flex flex-column gap-2">
-              @for (a of agents(); track a.id) {
-                <div class="agent" (click)="setActiveAgent(a.id)" [attr.aria-label]="'Munkatárs: ' + a.name" tabindex="0">
-                  <div class="av">{{ a.name?.[0] | uppercase }}</div>
-                  <div class="meta">
-                    <div class="title">{{ a.name }}</div>
-                    <div class="sub">{{ a.role }}@if (a.fixed) { • nem törölhető}</div>
-                  </div>
-                  @if (a.fixed) {
-                    <span class="badge">FŐ</span>
-                  }
+          <div class="flex flex-column gap-2">
+            @for (a of agents(); track a.id) {
+            <div
+              class="agent"
+              (click)="setActiveAgent(a.id)"
+              [attr.aria-label]="'Munkatárs: ' + a.name"
+              tabindex="0"
+            >
+              <div class="av">{{ a.name?.[0] | uppercase }}</div>
+              <div class="meta">
+                <div class="title">{{ a.name }}</div>
+                <div class="sub">
+                  {{ a.role }}@if (a.fixed) { • nem törölhető}
                 </div>
-                <!-- Accordion panel for chats of this agent -->
-                @if (a.id === activeAgentId()) {
-                  <div class="agent-panel open">
-                    <div class="search">
-                      <input pInputText type="text" placeholder="Keresés a beszélgetésekben…" aria-label="Keresés"/>
-                    </div>
-                    <div class="items">
-                      @if (isLoadingChats()) {
-                        <div class="hint">Beszélgetések betöltése...</div>
-                      } @else {
-                        @for (c of agentChats(); track c.id) {
-                          <div class="itm" [class.active]="activeChat()?.id === c.id" (click)="setActiveChatForAgent(a.id, c.id)">
-                            <strong>{{ c.title }}</strong>
-                            <small>{{ c.ts }}</small>
-                            <div class="hint">{{ c.preview }}</div>
-                          </div>
-                        }
-                        @if (!agentChats().length) {
-                          <div class="hint">Ehhez a munkatárshoz nincs beszélgetés.</div>
-                        }
-                      }
-                    </div>
-                  </div>
-                }
+              </div>
+              @if (a.fixed) {
+              <span class="badge">FŐ</span>
               }
             </div>
+            <!-- Accordion panel for chats of this agent -->
+            @if (a.id === activeAgentId()) {
+            <div class="agent-panel open">
+              <div class="search">
+                <input
+                  pInputText
+                  type="text"
+                  placeholder="Keresés a beszélgetésekben…"
+                  aria-label="Keresés"
+                />
+              </div>
+              <div class="items">
+                @if (isLoadingChats()) {
+                <div class="hint">Beszélgetések betöltése...</div>
+                } @else { @for (c of agentChats(); track c.id) {
+                <div
+                  class="itm"
+                  [class.active]="activeChat()?.id === c.id"
+                  (click)="setActiveChatForAgent(a.id, c.id)"
+                >
+                  <strong>{{ c.title }}</strong>
+                  <small>{{ c.ts }}</small>
+                  <div class="hint">{{ c.preview }}</div>
+                </div>
+                } @if (!agentChats().length) {
+                <div class="hint">Ehhez a munkatárshoz nincs beszélgetés.</div>
+                } }
+              </div>
+            </div>
+            } }
+          </div>
           }
         </div>
-        <div class="plus" (click)="showAgentModal.set(true)" role="button" tabindex="0" aria-label="Almunkatárs hozzáadása">
+        <div
+          class="plus"
+          (click)="showAgentModal.set(true)"
+          role="button"
+          tabindex="0"
+          aria-label="Almunkatárs hozzáadása"
+        >
           <strong>＋ Almunkatárs hozzáadása</strong>
         </div>
-        <p class="hint">Kattints egy munkatársra a beszélgetéseinek megnyitásához. Egyszerre csak egy munkatárs lehet lenyitva.</p>
+        <p class="hint">
+          Kattints egy munkatársra a beszélgetéseinek megnyitásához. Egyszerre
+          csak egy munkatárs lehet lenyitva.
+        </p>
       </div>
     </aside>
 
@@ -89,89 +157,139 @@
         <div class="chat-header">
           <div>
             @if (currentAgent()) {
-              <div class="pill">Aktív: {{ currentAgent()!.name }}</div>
-              <div class="hint">{{ currentAgent()!.desc }}</div>
+            <div class="pill">Aktív: {{ currentAgent()!.name }}</div>
+            <div class="hint">{{ currentAgent()!.desc }}</div>
             } @else if (isLoadingAgents()) {
-              <div class="pill">Betöltés...</div>
-              <div class="hint">Munkatársak betöltése folyamatban</div>
+            <div class="pill">Betöltés...</div>
+            <div class="hint">Munkatársak betöltése folyamatban</div>
             } @else {
-              <div class="pill">Nincs aktív munkatárs</div>
-              <div class="hint">Válassz egy munkatárst a bal oldali listából</div>
+            <div class="pill">Nincs aktív munkatárs</div>
+            <div class="hint">Válassz egy munkatárst a bal oldali listából</div>
             }
           </div>
           @if (currentAgent() && currentAgent()!.id==='root') {
-            <div class="quick">
-              <button pButton label="Munkatárs létrehozása" class="p-button-sm"></button>
-              <button pButton label="Felhasználók kezelése" class="p-button-sm p-button-outlined"></button>
-              <button pButton label="Konnektor hozzáadása" class="p-button-sm p-button-outlined"></button>
-              <button pButton label="Egyedi konnektor igény" class="p-button-sm p-button-outlined"></button>
-              <button pButton label="Munka ütemezése" class="p-button-sm p-button-outlined"></button>
-              <button pButton label="SF csapattal kapcsolatfelvétel" class="p-button-sm p-button-outlined"></button>
-            </div>
+          <div class="quick">
+            <button
+              pButton
+              label="Munkatárs létrehozása"
+              class="p-button-sm"
+            ></button>
+            <button
+              pButton
+              label="Felhasználók kezelése"
+              class="p-button-sm p-button-outlined"
+            ></button>
+            <button
+              pButton
+              label="Konnektor hozzáadása"
+              class="p-button-sm p-button-outlined"
+            ></button>
+            <button
+              pButton
+              label="Egyedi konnektor igény"
+              class="p-button-sm p-button-outlined"
+            ></button>
+            <button
+              pButton
+              label="Munka ütemezése"
+              class="p-button-sm p-button-outlined"
+            ></button>
+            <button
+              pButton
+              label="SF csapattal kapcsolatfelvétel"
+              class="p-button-sm p-button-outlined"
+            ></button>
+          </div>
           }
         </div>
 
         <!-- Thread -->
         <div class="thread" aria-live="polite">
           <div class="messages">
-            @if (activeChat()) {
-              @for (m of activeChat()!.messages; track $index) {
-                <div class="message-container" [ngClass]="{'user': m.from==='user', 'agent': m.from==='agent'}">
-                  @if (m.from === 'agent') {
-                    <div class="message-avatar">
-                      <div class="avatar-circle">
-                        {{ currentAgent()?.name?.[0] | uppercase }}
-                      </div>
-                    </div>
-                  }
-                  <div class="message-content">
-                    <div class="message-bubble" [ngClass]="{'user-bubble': m.from==='user', 'agent-bubble': m.from==='agent'}">
-                      <div class="message-text">{{ m.text }}</div>
-                    </div>
-                    @if (m.from === 'agent') {
-                      <div class="message-actions">
-                        <button class="action-btn" title="Másolás">
-                          <i class="pi pi-copy"></i>
-                        </button>
-                        <button class="action-btn" title="Tökéletes">
-                          <i class="pi pi-thumbs-up"></i>
-                        </button>
-                        <button class="action-btn" title="Nem jó">
-                          <i class="pi pi-thumbs-down"></i>
-                        </button>
-                      </div>
-                    }
-                  </div>
-                  @if (m.from === 'user') {
-                    <div class="message-avatar user-avatar">
-                      <div class="avatar-circle user-avatar-circle">
-                        <i class="pi pi-user"></i>
-                      </div>
-                    </div>
-                  }
+            @if (activeChat()) { @for (m of activeChat()!.messages; track
+            $index) {
+            <div
+              class="message-container"
+              [ngClass]="{ user: m.from === 'user', agent: m.from === 'agent' }"
+            >
+              @if (m.from === 'agent') {
+              <div class="message-avatar">
+                <div class="avatar-circle">
+                  {{ currentAgent()?.name?.[0] | uppercase }}
                 </div>
-              }
-            } @else {
-              <div class="empty-state">
-                <div class="empty-icon">
-                  <i class="pi pi-comments" style="font-size: 3rem; color: var(--muted);"></i>
-                </div>
-                <div class="empty-text">Válassz beszélgetést bal oldalt vagy írj üzenetet új thread indításához.</div>
               </div>
+              }
+              <div class="message-content">
+                <div
+                  class="message-bubble"
+                  [ngClass]="{
+                    'user-bubble': m.from === 'user',
+                    'agent-bubble': m.from === 'agent'
+                  }"
+                >
+                  <div class="message-text">{{ m.text }}</div>
+                </div>
+                @if (m.from === 'agent') {
+                <div class="message-actions">
+                  <button class="action-btn" title="Másolás">
+                    <i class="pi pi-copy"></i>
+                  </button>
+                  <button class="action-btn" title="Tökéletes">
+                    <i class="pi pi-thumbs-up"></i>
+                  </button>
+                  <button class="action-btn" title="Nem jó">
+                    <i class="pi pi-thumbs-down"></i>
+                  </button>
+                </div>
+                }
+              </div>
+              @if (m.from === 'user') {
+              <div class="message-avatar user-avatar">
+                <div class="avatar-circle user-avatar-circle">
+                  <i class="pi pi-user"></i>
+                </div>
+              </div>
+              }
+            </div>
+            } } @else {
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i
+                  class="pi pi-comments"
+                  style="font-size: 3rem; color: var(--muted)"
+                ></i>
+              </div>
+              <div class="empty-text">
+                Válassz beszélgetést bal oldalt vagy írj üzenetet új thread
+                indításához.
+              </div>
+            </div>
             }
           </div>
-          <div class="composer" style="position:relative;">
-            <textarea pTextarea 
-              placeholder="Írj üzenetet az aktív munkatársnak…" 
-              #composer 
+          <div class="composer" style="position: relative">
+            <textarea
+              pTextarea
+              placeholder="Írj üzenetet az aktív munkatársnak…"
+              #composer
               aria-label="Üzenet"
-              [disabled]="!currentAgent() || isLoadingSendMessage()"></textarea>
-            <button pButton 
-              
-              class="p-button-sm accent  button--bordered" 
-              style="position:absolute; right: 30px; bottom: 25px; height: 40px; width: 40px; border-radius: 50%;"
+              [disabled]="!currentAgent() || isLoadingSendMessage()"
+            ></textarea>
+            <button
+              pButton
+              class="p-button-sm accent button--bordered"
+              style="
+                position: absolute;
+                right: 30px;
+                bottom: 25px;
+                height: 40px;
+                width: 40px;
+                border-radius: 50%;
+              "
               (click)="sendMessage(composer)"
-              [disabled]="!currentAgent() || isLoadingSendMessage()"> <i class="pi pi-send" style="color: black"></i></button>
+              [disabled]="!currentAgent() || isLoadingSendMessage()"
+            >
+              <i class="pi pi-send" style="color: black"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -185,106 +303,159 @@
       </h2>
       <div class="content">
         @if (currentAgent()) {
-          <div class="section">
-            <h3>
-              <span>Instrukciók</span>
-              <button pButton icon="pi pi-plus" (click)="addInstruction()" class="p-button-text p-button-sm" title="Új instrukció" aria-label="Új instrukció"></button>
-            </h3>
-            <div class="body">
-              @for (i of currentAgent()!.settings?.instructions; track i.title) {
-                <div class="chip-container">
-                  <span class="chip" [class.new-chip]="i.isNew === true">{{ i.title }}</span>
-                  <button 
-                    class="chip-delete-btn" 
-                    (click)="deleteInstruction(i.title)"
-                    title="Instrukció törlése"
-                    >
-                    <i class="pi pi-times"></i>
-                  </button>
-                </div>
-              }
+        <div class="section">
+          <h3>
+            <span>Instrukciók</span>
+            <button
+              pButton
+              icon="pi pi-plus"
+              (click)="addInstruction()"
+              class="p-button-text p-button-sm"
+              title="Új instrukció"
+              aria-label="Új instrukció"
+            ></button>
+          </h3>
+          <div class="body">
+            @for (i of currentAgent()!.settings?.instructions; track i.title) {
+            <div class="chip-container">
+              <span class="chip" [class.new-chip]="i.isNew === true">{{
+                i.title
+              }}</span>
+              <button
+                class="chip-delete-btn"
+                (click)="deleteInstruction(i.title)"
+                title="Instrukció törlése"
+              >
+                <i class="pi pi-times"></i>
+              </button>
             </div>
+            }
           </div>
-          <div class="section">
-            <h3>
-              <span>Alkalmazások</span>
-              <button pButton icon="pi pi-plus" class="p-button-text p-button-sm" title="Új alkalmazás" aria-label="Új alkalmazás" (click)="addApp()"></button>
-            </h3>
-            <div class="body">
-              @for (i of currentAgent()!.settings?.apps; track i.title) {
-                <div class="chip-container">
-                  <span class="chip" [class.new-chip]="i.isNew === true">{{ i.title }}</span>
-                  <button 
-                    class="chip-delete-btn" 
-                    (click)="deleteApp(i.title)"
-                    title="Alkalmazás törlése"
-                    >
-                    <i class="pi pi-times"></i>
-                  </button>
-                </div>
-              }
+        </div>
+        <div class="section">
+          <h3>
+            <span>Alkalmazások</span>
+            <button
+              pButton
+              icon="pi pi-plus"
+              class="p-button-text p-button-sm"
+              title="Új alkalmazás"
+              aria-label="Új alkalmazás"
+              (click)="addApp()"
+            ></button>
+          </h3>
+          <div class="body">
+            @for (i of currentAgent()!.settings?.apps; track i.title) {
+            <div class="chip-container">
+              <span class="chip" [class.new-chip]="i.isNew === true">{{
+                i.title
+              }}</span>
+              <button
+                class="chip-delete-btn"
+                (click)="deleteApp(i.title)"
+                title="Alkalmazás törlése"
+              >
+                <i class="pi pi-times"></i>
+              </button>
             </div>
+            }
           </div>
-          <div class="section">
-            <h3>
-              <span>Erőforrások</span>
-              <button pButton icon="pi pi-plus" class="p-button-text p-button-sm" title="Új erőforrás" aria-label="Új erőforrás" (click)="addResource()"></button>
-            </h3>
-            <div class="body"
-                 (dragover)="onDragOver($event, 'resources')"
-                 (dragleave)="onDragLeave($event)"
-                 (drop)="onDrop($event, 'resources')"
-                 [class.drag-over]="isDragOver() && dragOverSection() === 'resources'">
-              @if (isDragOver() && dragOverSection() === 'resources') {
-                <div class="drop-zone-hint">
-                  <i class="pi pi-cloud-upload" style="font-size: 1.5rem; color: var(--accent-2);"></i>
-                  <p>Húzd ide a txt fájlokat (max 5MB)</p>
-                </div>
-              }
-              @for (i of currentAgent()!.settings?.resources; track i.title) {
-                <div class="chip-container">
-                  <span class="chip" [class.new-chip]="i.isNew === true">{{ i.title }}</span>
-                  <button 
-                    class="chip-delete-btn" 
-                    (click)="deleteResource(i.title)"
-                    title="Erőforrás törlése"
-                   >
-                    <i class="pi pi-times"></i>
-                  </button>
-                </div>
-              }
+        </div>
+        <div class="section">
+          <h3>
+            <span>Erőforrások</span>
+            <button
+              pButton
+              icon="pi pi-plus"
+              class="p-button-text p-button-sm"
+              title="Új erőforrás"
+              aria-label="Új erőforrás"
+              (click)="addResource()"
+            ></button>
+          </h3>
+          <div
+            class="body"
+            (dragover)="onDragOver($event, 'resources')"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event, 'resources')"
+            [class.drag-over]="
+              isDragOver() && dragOverSection() === 'resources'
+            "
+          >
+            @if (isDragOver() && dragOverSection() === 'resources') {
+            <div class="drop-zone-hint">
+              <i
+                class="pi pi-cloud-upload"
+                style="font-size: 1.5rem; color: var(--accent-2)"
+              ></i>
+              <p>Húzd ide a txt fájlokat (max 5MB)</p>
             </div>
+            } @for (i of currentAgent()!.settings?.resources; track i.title) {
+            <div class="chip-container">
+              <span class="chip" [class.new-chip]="i.isNew === true">{{
+                i.title
+              }}</span>
+              <button
+                class="chip-delete-btn"
+                (click)="deleteResource(i.title)"
+                title="Erőforrás törlése"
+              >
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+            }
           </div>
-          <p class="hint">A beállítások **az aktív munkatárshoz** tartoznak. A „＋" gombokkal adhatsz hozzá új elemeket.</p>
+        </div>
+        <p class="hint">
+          A beállítások **az aktív munkatárshoz** tartoznak. A „＋" gombokkal
+          adhatsz hozzá új elemeket.
+        </p>
         } @else if (isLoadingAgents()) {
-          <div class="section">
-            <h3>
-              <span>Betöltés...</span>
-            </h3>
-            <div class="body">
-              <div class="hint">Munkatárs beállítások betöltése folyamatban...</div>
+        <div class="section">
+          <h3>
+            <span>Betöltés...</span>
+          </h3>
+          <div class="body">
+            <div class="hint">
+              Munkatárs beállítások betöltése folyamatban...
             </div>
           </div>
+        </div>
         } @else {
-          <div class="section">
-            <h3>
-              <span>Nincs aktív munkatárs</span>
-            </h3>
-            <div class="body">
-              <div class="hint">Válassz egy munkatárst a bal oldali listából a beállítások megtekintéséhez.</div>
+        <div class="section">
+          <h3>
+            <span>Nincs aktív munkatárs</span>
+          </h3>
+          <div class="body">
+            <div class="hint">
+              Válassz egy munkatárst a bal oldali listából a beállítások
+              megtekintéséhez.
             </div>
           </div>
+        </div>
         }
       </div>
     </aside>
   </main>
 
   <!-- Agent Modal -->
-  <p-dialog [visible]="showAgentModal()" [modal]="true" [style]="{width:'720px'}" header="Új almunkatárs" (onHide)="showAgentModal.set(false)" aria-label="Új almunkatárs modál">
+  <p-dialog
+    [visible]="showAgentModal()"
+    [modal]="true"
+    [style]="{ width: '720px' }"
+    header="Új almunkatárs"
+    (onHide)="showAgentModal.set(false)"
+    aria-label="Új almunkatárs modál"
+  >
     <div class="grid formgrid p-fluid">
       <div class="field col-12">
         <label for="name" class="text-sm">Név</label>
-        <input id="name" pInputText placeholder="Pl. Pénzügyi Elemző" required/>
+        <input
+          id="name"
+          pInputText
+          placeholder="Pl. Pénzügyi Elemző"
+          required
+        />
       </div>
       <div class="field col-12">
         <label for="role" class="text-sm">Szerepkör</label>
@@ -297,19 +468,37 @@
       </div>
       <div class="field col-12">
         <label for="desc" class="text-sm">Leírás</label>
-        <textarea id="desc" pTextarea rows="3" placeholder="Rövid bemutatkozás, felelősségek, hatókör…"></textarea>
+        <textarea
+          id="desc"
+          pTextarea
+          rows="3"
+          placeholder="Rövid bemutatkozás, felelősségek, hatókör…"
+        ></textarea>
       </div>
       <div class="field col-12">
         <label for="cfg" class="text-sm">Konfiguráció (.json vagy .txt)</label>
-        <textarea id="cfg" pTextarea rows="6" placeholder='{"mcpServers":[], "tools":["email","sql","writer","calc","pdf","imageIngest"], "policy":"read-write"}'></textarea>
+        <textarea
+          id="cfg"
+          pTextarea
+          rows="6"
+          placeholder='{"mcpServers":[], "tools":["email","sql","writer","calc","pdf","imageIngest"], "policy":"read-write"}'
+        ></textarea>
       </div>
     </div>
     <ng-template pTemplate="footer">
-      <button pButton label="Mégse" class="p-button-text" (click)="showAgentModal.set(false)"></button>
-      <button pButton label="Mentés" icon="pi pi-check" class="p-button" (click)="showAgentModal.set(false)"></button>
+      <button
+        pButton
+        label="Mégse"
+        class="p-button-text"
+        (click)="showAgentModal.set(false)"
+      ></button>
+      <button
+        pButton
+        label="Mentés"
+        icon="pi pi-check"
+        class="p-button"
+        (click)="showAgentModal.set(false)"
+      ></button>
     </ng-template>
   </p-dialog>
-
 </div>
-
-

@@ -17,7 +17,7 @@ import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
     TextareaModule,
   ],
   template: `
-    <div class="formgrid p-fluid">
+    <div class="formgrid p-fluid asd">
       <div class="field ">
         <label for="instructionTitle" class="text-sm font-medium"
           >Instrukció megnevezése</label
@@ -58,7 +58,6 @@ import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
       <button
         pButton
         label="Mégse"
-        icon="pi pi-times"
         style="padding: 10px ; border-radius: 8px; "
         class="p-button-text"
         (click)="onCancel()"
@@ -67,7 +66,6 @@ import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
       <button
         pButton
         label="Hozzáadás"
-        icon="pi pi-check"
         style="padding: 10px ; border-radius: 8px; "
         class="p-button-success"
         (click)="onSave()"
@@ -90,6 +88,10 @@ import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
         color: var(--text);
         border-radius: 8px;
         padding: 10px;
+      }
+
+      .asd {
+        box-shadow: 20px 20px red red;
       }
 
       .field input:focus,
