@@ -63,7 +63,7 @@ export class AgentsApiService {
       id: 'c1',
       title: 'Konnektor hozzáadása – OneDrive',
       ts: '2025-09-02 10:05',
-      agentId: 'root',
+      taskId: 'root',
       preview: 'Kérem a OneDrive konnektor telepítését…',
       messages: [
         { from: 'agent', text: 'Üdv! Milyen tárhelyhez kell jogosultság?' },
@@ -74,7 +74,7 @@ export class AgentsApiService {
       id: 'c2',
       title: 'Munka ütemezése – heti PDF riport',
       ts: '2025-09-08 09:12',
-      agentId: 'root',
+      taskId: 'root',
       preview: 'Pénteken 16:00-kor heti riport PDF-be…',
       messages: [
         { from: 'user', text: 'Pénteken 16:00-kor kérek heti riportot.' },

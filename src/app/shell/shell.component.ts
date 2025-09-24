@@ -66,9 +66,12 @@ export class ShellComponent {
   readonly themeLabel = this.themeStore.themeLabel;
 
   // Agents state from store
-  readonly agents = this.agentsStore.agents;
+  readonly tasks = this.agentsStore.tasks;
+  readonly tasksWithAgents = this.agentsStore.tasksWithAgents;
+  readonly currentTask = this.agentsStore.currentTask;
+  readonly activeTaskId = this.agentsStore.activeTaskId;
   readonly activeAgentId = this.agentsStore.activeAgentId;
-  readonly activeChatByAgent = this.agentsStore.activeChatByAgent;
+  readonly taskChats = this.agentsStore.taskChats;
   readonly chats = this.agentsStore.chats;
   readonly loading = this.agentsStore.loading;
   readonly error = this.agentsStore.error;
@@ -83,7 +86,6 @@ export class ShellComponent {
 
   // Computed properties from store with safety checks
   readonly currentAgent = this.agentsStore.currentAgent;
-  readonly agentChats = this.agentsStore.agentChats;
   readonly activeChat = this.agentsStore.activeChat;
 
   // Modal state
@@ -285,12 +287,16 @@ export class ShellComponent {
     this.isRightAsideOpen.update(open => !open);
   }
 
-  setActiveAgent(id: string) {
-    this.agentsStore.setActiveAgent(id);
+  setActiveTask(taskId: string) {
+    this.agentsStore.setActiveTask(taskId);
   }
 
-  setActiveChatForAgent(agentId: string, chatId: string | null) {
-    this.agentsStore.setActiveChatForAgent(agentId, chatId);
+  setActiveAgent(agentId: string) {
+    this.agentsStore.setActiveAgent(agentId);
+  }
+
+  setActiveChatForTask(taskId: string, chatId: string | null) {
+    this.agentsStore.setActiveChatForTask(taskId, chatId);
   }
 
   async sendMessage(textarea: HTMLTextAreaElement) {

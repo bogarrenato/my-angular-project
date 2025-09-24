@@ -100,53 +100,76 @@
                   </div>
                 </div>
               </div>
-              } @else {
-              <div class="flex flex-column gap-2">
-                @for (a of agents(); track a.id) {
-                <div
-                  class="agent"
-                  (click)="setActiveAgent(a.id)"
-                  [attr.aria-label]="'Munkatárs: ' + a.name"
-                  tabindex="0"
-                >
-                  <div class="av">{{ a.name?.[0] | uppercase }}</div>
-                  <div class="meta">
-                    <div class="title">{{ a.name }}</div>
-                    <div class="sub">
-                      {{ a.role }}@if (a.fixed) { • nem törölhető}
+            } @else {
+            <div class="flex flex-column gap-2">
+              @for (task of tasksWithAgents(); track task.id) {
+              <!-- Task -->
+              <div
+                class="task-item"
+                [class.active]="task.id === activeTaskId()"
+                (click)="setActiveTask(task.id)"
+                [attr.aria-label]="'Feladat: ' + task.title"
+                tabindex="0"
+              >
+                <div class="task-header">
+                  <div class="task-icon">📋</div>
+                  <div class="task-meta">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-sub">
+                      {{ task.status }} • {{ task.agents.length }} agent
                     </div>
                   </div>
-                  @if (a.fixed) {
-                  <span class="badge">FŐ</span>
-                  }
+                  <span class="badge task-badge">FELADAT</span>
                 </div>
-                <!-- Accordion panel for chats of this agent -->
-                @if (a.id === activeAgentId()) {
+              </div>
+
+              <!-- Agents under this task -->
+              @if (task.id === activeTaskId()) {
+                @for (agent of task.agents; track agent.id) {
+                <div
+                  class="agent task-agent"
+                  [class.active]="agent.id === activeAgentId()"
+                  (click)="setActiveAgent(agent.id)"
+                  [attr.aria-label]="'Munkatárs: ' + agent.name"
+                  tabindex="0"
+                >
+                  <div class="av">{{ agent.name?.[0] | uppercase }}</div>
+                  <div class="meta">
+                    <div class="title">{{ agent.name }}</div>
+                    <div class="sub">
+                      {{ agent.role }} • {{ agent.status }}
+                    </div>
+                  </div>
+                  <span class="badge agent-badge">{{ agent.id.includes('main') ? 'FŐ' : 'SUB' }}</span>
+                </div>
+                }
+
+                <!-- Accordion panel for chats of this task -->
                 <div class="agent-panel open">
                   <div class="search"></div>
                   <div class="items">
                     @if (isLoadingChats()) {
                     <div class="hint">Beszélgetések betöltése...</div>
-                    } @else { @for (c of agentChats(); track c.id) {
+                    } @else { @for (c of taskChats(); track c.id) {
                     <div
                       class="itm"
                       [class.active]="activeChat()?.id === c.id"
-                      (click)="setActiveChatForAgent(a.id, c.id)"
+                      (click)="setActiveChatForTask(task.id, c.id)"
                     >
                       <strong>{{ c.title }}</strong>
                       <small>{{ c.ts }}</small>
                       <div class="hint">{{ c.preview }}</div>
                     </div>
-                    } @if (!agentChats().length) {
+                    } @if (!taskChats().length) {
                     <div class="hint">
-                      Ehhez a munkatárshoz nincs beszélgetés.
+                      Ehhez a feladathoz nincs beszélgetés.
                     </div>
                     } }
                   </div>
                 </div>
-                } }
-              </div>
-              }
+              } }
+            </div>
+            }
             </div>
             <div
               class="plus"
@@ -294,7 +317,7 @@
                   #composer
                   style="height: 124px; width: 100%"
                   aria-label="Üzenet"
-                  [disabled]="!currentAgent() || isLoadingSendMessage()"
+                
                 ></textarea>
                 <button
                   pButton
@@ -308,7 +331,7 @@
                     border-radius: 50%;
                   "
                   (click)="sendMessage(composer)"
-                  [disabled]="!currentAgent() || isLoadingSendMessage()"
+                 
                 >
                   <i class="pi pi-send" style="color: black"></i>
                 </button>
@@ -327,7 +350,7 @@
       >
         <h2>
           <span>Munkatárs beállítások</span>
-          <span class="pill">{{ agents().length }} munkatárs</span>
+          <span class="pill">{{ tasks().length }} feladat</span>
         </h2>
         <div class="content">
           @if (currentAgent()) {
@@ -532,3 +555,4 @@
     </ng-template>
   </p-dialog>
 </div>
+

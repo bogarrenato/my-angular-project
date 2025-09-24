@@ -386,6 +386,100 @@ aside:last-of-type.right-aside-open {
   color: var(--text);
 }
 
+/* Task item styling */
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--card-background-color), var(--panel-2));
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 4px solid var(--accent);
+}
+
+.task-item:hover {
+  border-color: #334155;
+  transform: translateY(-1px);
+}
+
+.task-item.active {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 2px rgba(58, 170, 255, 0.3);
+  transform: translateX(2px);
+}
+
+.task-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.task-icon {
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  border-radius: 8px;
+  color: #000000;
+}
+
+.task-meta {
+  flex: 1;
+}
+
+.task-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.task-sub {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.task-badge {
+  background: var(--accent);
+  color: #000000;
+  font-weight: 700;
+}
+
+/* Task agent styling */
+.agent.task-agent {
+  margin-left: 20px;
+  border-left: 2px solid var(--accent-2);
+  background: var(--card-background-color);
+  opacity: 0.9;
+}
+
+.agent.task-agent .badge.agent-badge {
+  background: var(--accent-2);
+  color: #000000;
+  font-weight: 600;
+}
+
+/* Active states */
+.agent.active {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 2px rgba(58, 170, 255, 0.3);
+  transform: translateX(2px);
+}
+
+.task-item.active {
+  border-left-color: var(--accent);
+}
+
+.agent.task-agent.active {
+  border-left-color: var(--accent-2);
+}
+
 .agent-panel {
   display: none;
   margin-top: 6px;
