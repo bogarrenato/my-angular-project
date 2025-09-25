@@ -243,7 +243,7 @@
 
           <!-- Thread -->
           <div class="thread" aria-live="polite">
-            <div class="messages">
+            <div class="messages" style="max-height: 900px;">
               @if (activeChat()) { @for (m of activeChat()!.messages; track
               $index) {
               <div
@@ -306,6 +306,65 @@
                 </div>
               </div>
               }
+              
+              <!-- Skeleton loading while waiting for response -->
+              @if (isSendingMessage() && !isStreaming()) {
+              <div class="message-container agent skeleton">
+                <div class="message-avatar">
+                  <div class="avatar-circle">
+                    {{ currentAgent()?.name?.[0] | uppercase }}
+                  </div>
+                </div>
+                <div class="message-content">
+                  <div class="message-bubble agent-bubble">
+                    <div class="skeleton-text">
+                      <div class="skeleton-line"></div>
+                      <div class="skeleton-line short"></div>
+                      <div class="skeleton-line medium"></div>
+                    </div>
+                  </div>
+                  <div class="message-actions">
+                    <span class="typing-indicator">Válasz előkészítése...</span>
+                  </div>
+                </div>
+              </div>
+              }
+              
+              <!-- Streaming response -->
+              @if (isStreaming() && streamingResponse()) {
+              <div class="message-container agent">
+                <div class="message-avatar">
+                  <div class="avatar-circle">
+                    {{ currentAgent()?.name?.[0] | uppercase }}
+                  </div>
+                </div>
+                <div class="message-content">
+                  <div class="message-bubble agent-bubble">
+                    <div class="message-text streaming-text">
+                      {{ streamingResponse() }}
+                      <span class="streaming-cursor">|</span>
+                    </div>
+                  </div>
+                  <div class="message-actions">
+                    <span class="typing-indicator">Ír...</span>
+                  </div>
+                </div>
+              </div>
+              }
+              
+              <!-- Streaming error -->
+              @if (streamingError()) {
+              <div class="message-container agent error">
+                <div class="message-content">
+                  <div class="message-bubble agent-bubble error-bubble">
+                    <div class="message-text">
+                      <i class="pi pi-exclamation-triangle" style="margin-right: 8px;"></i>
+                      {{ streamingError() }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              }
             </div>
             <div class="composer" style="justify-content: center;">
               <div
@@ -315,13 +374,15 @@
                   pTextarea
                   placeholder="Írj üzenetet az aktív munkatársnak…"
                   #composer
+                  [(ngModel)]="messageText"
+                  
                   style="height: 124px; width: 100%"
                   aria-label="Üzenet"
-                
                 ></textarea>
                 <button
                   pButton
                   class="p-button-sm accent button--bordered"
+                  [class.sending]="isSendingMessage()"
                   style="
                     position: absolute;
                     right: 30px;
@@ -331,9 +392,13 @@
                     border-radius: 50%;
                   "
                   (click)="sendMessage(composer)"
-                 
+                  [disabled]="!messageText().trim() || isSendingMessage()"
                 >
-                  <i class="pi pi-send" style="color: black"></i>
+                  @if (isSendingMessage()) {
+                    <i class="pi pi-spin pi-spinner" style="color: black"></i>
+                  } @else {
+                    <i class="pi pi-send" style="color: black"></i>
+                  }
                 </button>
               </div>
             </div>

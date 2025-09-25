@@ -5,6 +5,7 @@ import {
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
 import { ChipModule } from 'primeng/chip';
@@ -21,6 +22,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ThemeStore } from '../stores/theme.store';
 import { AgentsStore } from '../stores/agents.store';
+import { StreamingApiService } from '../services/streaming-api.service';
 import { RequestStateStore } from '../stores/request-state.store';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { InstructionDialogComponent } from '../dialogs/instruction-dialog.component';
@@ -34,6 +36,7 @@ import { take } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ButtonModule,
     AvatarModule,
     ChipModule,
@@ -57,6 +60,7 @@ export class ShellComponent {
   // Inject stores
   private readonly themeStore = inject(ThemeStore);
   private readonly agentsStore = inject(AgentsStore);
+  private readonly streamingApi = inject(StreamingApiService);
   private readonly requestStateStore = inject(RequestStateStore);
   private readonly dialogService = inject(DialogService);
 
@@ -95,6 +99,15 @@ export class ShellComponent {
   
   // Right aside toggle state
   readonly isRightAsideOpen = signal(false);
+  
+  // Message input state
+  readonly messageText = signal('');
+  readonly isSendingMessage = signal(false);
+  
+  // Streaming state
+  readonly isStreaming = this.streamingApi.isStreaming;
+  readonly streamingResponse = this.streamingApi.streamingResponse;
+  readonly streamingError = this.streamingApi.streamingError;
   
   // Drag and drop state
   readonly isDragOver = signal(false);
@@ -300,11 +313,25 @@ export class ShellComponent {
   }
 
   async sendMessage(textarea: HTMLTextAreaElement) {
-    const txt = textarea.value.trim();
-    if (!txt) return;
+    const txt = this.messageText().trim();
+    if (!txt || this.isSendingMessage()) return;
 
-    await this.agentsStore.sendMessage(txt);
-    textarea.value = '';
+    this.isSendingMessage.set(true);
+    
+    try {
+      await this.agentsStore.sendMessage(txt);
+      this.messageText.set('');
+      textarea.value = '';
+    } finally {
+      this.isSendingMessage.set(false);
+    }
+  }
+
+  onEnterKey(event: KeyboardEvent, textarea: HTMLTextAreaElement) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.sendMessage(textarea);
+    }
   }
 
   // Drag and drop methods
