@@ -12,13 +12,13 @@
       "
     >
       <div class="brand" title="AI HUB">
-        <div>
+        <!-- <div>
           <h1>AI HUB • SimplyFire AI HUB</h1>
           <small
             >Modell‑, eszköz‑ és konnektorfüggetlen MI agent
             keretrendszer</small
           >
-        </div>
+        </div> -->
       </div>
       <div class="actions">
         <!--       <button pButton type="button" label="Regisztráció" class="p-button-outlined p-button-sm"></button>
@@ -27,6 +27,18 @@
           pButton
           type="button"
           class="p-button-text p-button-rounded"
+          style="font-size: 20px"
+          icon="pi pi-telegram"
+          stlye="box-shadow: none;"
+          (click)="startNewChat()"
+          [attr.aria-label]="'Új beszélgetés'"
+          title="Új beszélgetés indítása"
+        ></button>
+        <button
+          pButton
+          type="button"
+          class="p-button-text p-button-rounded"
+          style="font-size: 20px; box-shadow: none;"
           [icon]="isRightAsideOpen() ? 'pi pi-eye-slash' : 'pi pi-cog'"
           (click)="toggleRightAside()"
           [attr.aria-label]="
@@ -39,6 +51,8 @@
         <button
           pButton
           type="button"
+        
+          style="font-size: 20px; box-shadow: none;"
           class="p-button-text p-button-rounded"
           [icon]="themeIcon()"
           (click)="toggleTheme()"
@@ -55,7 +69,7 @@
       <!-- LEFT: Munkatársak + Lenyíló beszélgetések -->
       <aside
         class="panel"
-        style="max-width: 500px; width: 500px"
+        style="max-width: 400px; width: 400px"
         id="leftCol"
         aria-label="Munkatársak panel"
       >
@@ -72,7 +86,7 @@
             pInputText
             style="
               height: 40px;
-              border: 1px solid var(--border);
+
               border-radius: 8px;
               padding: 0 10px;
             "
@@ -100,32 +114,32 @@
                   </div>
                 </div>
               </div>
-            } @else {
-            <div class="flex flex-column gap-2">
-              @for (task of tasksWithAgents(); track task.id) {
-              <!-- Task -->
-              <div
-                class="task-item"
-                [class.active]="task.id === activeTaskId()"
-                (click)="setActiveTask(task.id)"
-                [attr.aria-label]="'Feladat: ' + task.title"
-                tabindex="0"
-              >
-                <div class="task-header">
-                  <div class="task-icon">📋</div>
-                  <div class="task-meta">
-                    <div class="task-title">{{ task.title }}</div>
-                    <div class="task-sub">
-                      {{ task.status }} • {{ task.agents.length }} agent
+              } @else {
+              <div class="flex flex-column gap-2">
+                @for (task of tasksWithAgents(); track task.id) {
+                <!-- Task -->
+                <div
+                  class="task-item"
+                  [class.active]="task.id === activeTaskId()"
+                  (click)="setActiveTask(task.id)"
+                  [attr.aria-label]="'Feladat: ' + task.title"
+                  tabindex="0"
+                >
+                  <div class="task-header">
+                    <div class="task-icon">📋</div>
+                    <div class="task-meta">
+                      <div class="task-title">{{ task.title }}</div>
+                      <div class="task-sub">
+                        {{ task.status }} • {{ task.agents.length }} agent
+                      </div>
                     </div>
+                    <span class="badge task-badge">FELADAT</span>
                   </div>
-                  <span class="badge task-badge">FELADAT</span>
                 </div>
-              </div>
 
-              <!-- Agents under this task -->
-              @if (task.id === activeTaskId()) {
-                @for (agent of task.agents; track agent.id) {
+                <!-- Agents under this task -->
+                @if (task.id === activeTaskId()) { @for (agent of task.agents;
+                track agent.id) {
                 <div
                   class="agent task-agent"
                   [class.active]="agent.id === activeAgentId()"
@@ -136,11 +150,11 @@
                   <div class="av">{{ agent.name?.[0] | uppercase }}</div>
                   <div class="meta">
                     <div class="title">{{ agent.name }}</div>
-                    <div class="sub">
-                      {{ agent.role }} • {{ agent.status }}
-                    </div>
+                    <div class="sub">{{ agent.role }} • {{ agent.status }}</div>
                   </div>
-                  <span class="badge agent-badge">{{ agent.id.includes('main') ? 'FŐ' : 'SUB' }}</span>
+                  <span class="badge agent-badge">{{
+                    agent.id.includes('main') ? 'FŐ' : 'SUB'
+                  }}</span>
                 </div>
                 }
 
@@ -153,6 +167,7 @@
                     } @else { @for (c of taskChats(); track c.id) {
                     <div
                       class="itm"
+                    
                       [class.active]="activeChat()?.id === c.id"
                       (click)="setActiveChatForTask(task.id, c.id)"
                     >
@@ -167,11 +182,11 @@
                     } }
                   </div>
                 </div>
-              } }
+                } }
+              </div>
+              }
             </div>
-            }
-            </div>
-            <div
+            <!-- <div
               class="plus"
               (click)="showAgentModal.set(true)"
               role="button"
@@ -184,7 +199,7 @@
             <p class="hint">
               Kattints egy munkatársra a beszélgetéseinek megnyitásához.
               Egyszerre csak egy munkatárs lehet lenyitva.
-            </p>
+            </p> -->
           </div>
         </div>
       </aside>
@@ -243,7 +258,7 @@
 
           <!-- Thread -->
           <div class="thread" aria-live="polite">
-            <div class="messages">
+            <div class="messages" style="max-height: 900px">
               @if (activeChat()) { @for (m of activeChat()!.messages; track
               $index) {
               <div
@@ -271,7 +286,7 @@
                     <div class="message-text">{{ m.text }}</div>
                   </div>
                   @if (m.from === 'agent') {
-                  <div class="message-actions">
+                  <!-- <div class="message-actions">
                     <button class="action-btn" title="Másolás">
                       <i class="pi pi-copy"></i>
                     </button>
@@ -281,7 +296,7 @@
                     <button class="action-btn" title="Nem jó">
                       <i class="pi pi-thumbs-down"></i>
                     </button>
-                  </div>
+                  </div> -->
                   }
                 </div>
                 @if (m.from === 'user') {
@@ -306,22 +321,125 @@
                 </div>
               </div>
               }
+
+              <!-- Skeleton loading while waiting for response -->
+              @if (isSendingMessage() && !isStreaming()) {
+              <div class="message-container agent skeleton">
+                <div class="message-avatar">
+                  <div class="avatar-circle">
+                    {{ currentAgent()?.name?.[0] | uppercase }}
+                  </div>
+                </div>
+                <div class="message-content">
+                  <div class="message-bubble agent-bubble">
+                    <div class="skeleton-text">
+                      <div class="skeleton-line"></div>
+                      <div class="skeleton-line short"></div>
+                      <div class="skeleton-line medium"></div>
+                    </div>
+                  </div>
+                  <div class="message-actions">
+                    <span class="typing-indicator">Válasz előkészítése...</span>
+                  </div>
+                </div>
+              </div>
+              }
+
+              <!-- Streaming response -->
+              @if (isStreaming() && streamingResponse()) {
+              <div class="message-container agent">
+                <div class="message-avatar">
+                  <div class="avatar-circle">
+                    {{ currentAgent()?.name?.[0] | uppercase }}
+                  </div>
+                </div>
+                <div class="message-content">
+                  <div class="message-bubble agent-bubble">
+                    <div class="message-text streaming-text">
+                      {{ streamingResponse() }}
+                      <span class="streaming-cursor">|</span>
+                    </div>
+                  </div>
+                  <div class="message-actions">
+                    <span class="typing-indicator">Ír...</span>
+                    @if (currentTask()?.processed_file_path) {
+                      <button 
+                        pButton 
+                        type="button"
+                        class="p-button-text p-button-sm download-btn"
+                        icon="pi pi-download"
+                        (click)="downloadProcessedFile()"
+                        title="Feldolgozott fájl letöltése"
+                        aria-label="Feldolgozott fájl letöltése"
+                      ></button>
+                    }
+                  </div>
+                </div>
+              </div>
+              }
+
+              <!-- Streaming error -->
+              @if (streamingError()) {
+              <div class="message-container agent error">
+                <div class="message-content">
+                  <div class="message-bubble agent-bubble error-bubble">
+                    <div class="message-text">
+                      <i
+                        class="pi pi-exclamation-triangle"
+                        style="margin-right: 8px"
+                      ></i>
+                      {{ streamingError() }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              }
             </div>
-            <div class="composer" style="justify-content: center;">
+            <div class="composer" style="justify-content: center">
               <div
-                style="width: 100%; position: relative; justify-content: center; max-width: 800px;"
+                style="
+                  width: 100%;
+                  position: relative;
+                  justify-content: center;
+                  max-width: 800px;
+                "
               >
-                <textarea
-                  pTextarea
-                  placeholder="Írj üzenetet az aktív munkatársnak…"
-                  #composer
-                  style="height: 124px; width: 100%"
-                  aria-label="Üzenet"
-                
-                ></textarea>
+                <div 
+                  class="textarea-container"
+                  [class.drag-over]="isDragOver()"
+                  (dragover)="onDragOver($event)"
+                  (dragleave)="onDragLeave($event)"
+                  (drop)="onDrop($event)"
+                >
+                  <textarea
+                    pTextarea
+                    placeholder="Oldj meg egy feladatot… vagy húzz ide egy .txt fájlt"
+                    #composer
+                    [(ngModel)]="messageText"
+                    style="height: 124px; width: 100%"
+                    aria-label="Üzenet"
+                  ></textarea>
+                  
+                  <!-- Feltöltött fájl megjelenítése -->
+                  @if (uploadedFile()) {
+                    <div class="uploaded-file">
+                      <i class="pi pi-file"></i>
+                      <span>{{ uploadedFile()?.name }}</span>
+                      <button 
+                        type="button" 
+                        class="remove-file-btn"
+                        (click)="removeUploadedFile()"
+                        aria-label="Fájl eltávolítása"
+                      >
+                        <i class="pi pi-times"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
                 <button
                   pButton
                   class="p-button-sm accent button--bordered"
+                  [class.sending]="isSendingMessage()"
                   style="
                     position: absolute;
                     right: 30px;
@@ -331,9 +449,13 @@
                     border-radius: 50%;
                   "
                   (click)="sendMessage(composer)"
-                 
+                  [disabled]="!messageText().trim() || isSendingMessage()"
                 >
-                  <i class="pi pi-send" style="color: black"></i>
+                  @if (isSendingMessage()) {
+                  <i class="pi pi-spin pi-spinner"></i>
+                  } @else {
+                  <i class="pi pi-send"></i>
+                  }
                 </button>
               </div>
             </div>
@@ -427,9 +549,9 @@
             </h3>
             <div
               class="body"
-              (dragover)="onDragOver($event, 'resources')"
-              (dragleave)="onDragLeave($event)"
-              (drop)="onDrop($event, 'resources')"
+              (dragover)="onDragOverSection($event, 'resources')"
+              (dragleave)="onDragLeaveSection($event)"
+              (drop)="onDropSection($event, 'resources')"
               [class.drag-over]="
                 isDragOver() && dragOverSection() === 'resources'
               "
@@ -555,4 +677,3 @@
     </ng-template>
   </p-dialog>
 </div>
-

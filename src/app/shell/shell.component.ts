@@ -5,6 +5,7 @@ import {
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
 import { ChipModule } from 'primeng/chip';
@@ -21,6 +22,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ThemeStore } from '../stores/theme.store';
 import { AgentsStore } from '../stores/agents.store';
+import { StreamingApiService } from '../services/streaming-api.service';
 import { RequestStateStore } from '../stores/request-state.store';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { InstructionDialogComponent } from '../dialogs/instruction-dialog.component';
@@ -34,6 +36,7 @@ import { take } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ButtonModule,
     AvatarModule,
     ChipModule,
@@ -57,6 +60,7 @@ export class ShellComponent {
   // Inject stores
   private readonly themeStore = inject(ThemeStore);
   private readonly agentsStore = inject(AgentsStore);
+  private readonly streamingApi = inject(StreamingApiService);
   private readonly requestStateStore = inject(RequestStateStore);
   private readonly dialogService = inject(DialogService);
 
@@ -95,6 +99,16 @@ export class ShellComponent {
   
   // Right aside toggle state
   readonly isRightAsideOpen = signal(false);
+  
+  // Message input state
+  readonly messageText = signal('');
+  readonly isSendingMessage = signal(false);
+  readonly uploadedFile = signal<File | null>(null);
+  
+  // Streaming state
+  readonly isStreaming = this.streamingApi.isStreaming;
+  readonly streamingResponse = this.streamingApi.streamingResponse;
+  readonly streamingError = this.streamingApi.streamingError;
   
   // Drag and drop state
   readonly isDragOver = signal(false);
@@ -287,6 +301,12 @@ export class ShellComponent {
     this.isRightAsideOpen.update(open => !open);
   }
 
+  startNewChat() {
+    // Clear current active task and agent to start fresh
+    this.agentsStore.clearActiveTask();
+    this.messageText.set('');
+  }
+
   setActiveTask(taskId: string) {
     this.agentsStore.setActiveTask(taskId);
   }
@@ -300,29 +320,86 @@ export class ShellComponent {
   }
 
   async sendMessage(textarea: HTMLTextAreaElement) {
-    const txt = textarea.value.trim();
-    if (!txt) return;
+    const txt = this.messageText().trim();
+    const file = this.uploadedFile();
+    
+    if ((!txt && !file) || this.isSendingMessage()) return;
 
-    await this.agentsStore.sendMessage(txt);
-    textarea.value = '';
+    this.isSendingMessage.set(true);
+    
+    try {
+      if (file) {
+        // Ha van feltöltött fájl, azt küldjük el
+        await this.agentsStore.sendMessageWithFile(txt, file);
+      } else {
+        // Ha nincs fájl, normál üzenetet küldünk
+        await this.agentsStore.sendMessage(txt);
+      }
+      
+      this.messageText.set('');
+      textarea.value = '';
+      this.uploadedFile.set(null);
+    } finally {
+      this.isSendingMessage.set(false);
+    }
   }
 
-  // Drag and drop methods
-  onDragOver(event: DragEvent, section: string): void {
+  onEnterKey(event: KeyboardEvent, textarea: HTMLTextAreaElement) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.sendMessage(textarea);
+    }
+  }
+
+  // Drag and drop methods for textarea
+  onDragOver(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
     this.isDragOver.set(true);
-    this.dragOverSection.set(section);
   }
 
   onDragLeave(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
     this.isDragOver.set(false);
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver.set(false);
+    
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+        this.uploadedFile.set(file);
+      } else {
+        alert('Csak .txt fájlokat lehet feltölteni!');
+      }
+    }
+  }
+
+  removeUploadedFile(): void {
+    this.uploadedFile.set(null);
+  }
+
+  // Drag and drop methods for sections
+  onDragOverSection(event: DragEvent, section: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver.set(true);
+    this.dragOverSection.set(section);
+  }
+
+  onDragLeaveSection(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver.set(false);
     this.dragOverSection.set(null);
   }
 
-  async onDrop(event: DragEvent, section: string): Promise<void> {
+  async onDropSection(event: DragEvent, section: string): Promise<void> {
     event.preventDefault();
     event.stopPropagation();
     this.isDragOver.set(false);
@@ -386,4 +463,32 @@ export class ShellComponent {
       reader.readAsText(file, 'UTF-8');
     });
   }
+
+  async downloadProcessedFile(): Promise<void> {
+    const currentTask = this.agentsStore.currentTask();
+    if (!currentTask?.id) {
+      console.error('No active task found');
+      return;
+    }
+
+    try {
+      await this.streamingApi.downloadProcessedFile(currentTask.id);
+    } catch (error) {
+      console.error('Error downloading processed file:', error);
+      alert('Hiba történt a fájl letöltése során.');
+    }
+  }
 }
+
+
+
+//cookie-ba tároljuk el azt hogy készítettünk egy agentet
+
+
+// behívok 1 végpontra - vissza ad egy stringet, azt el kellene menteni - az lesz a promptja az agentnek amit létrehozunk
+
+//json vissza a feladatról 
+
+
+//localstorageba menteni és megjelnik az új elem - listában az agent
+// 

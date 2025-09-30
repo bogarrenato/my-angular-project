@@ -17,6 +17,10 @@
   z-index: 5;
 }
 
+.itm {
+  color: var(--p-button-primary-hover-background);
+}
+
 /* Chat message bubble max width helper */
 .max-w-20rem {
   max-width: 20rem;

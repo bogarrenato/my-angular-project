@@ -341,7 +341,7 @@ import { CommonModule } from '@angular/common';
     `,
   ],
 })
-export class SplashScreenComponent implements OnInit, OnDestroy {
+export class SplashScreenComponent implements OnInit {
   isHidden = signal(false);
   particles = Array(20)
     .fill(0)
@@ -352,9 +352,5 @@ export class SplashScreenComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.isHidden.set(true);
     }, 1);
-  }
-
-  ngOnDestroy() {
-    // Cleanup if needed
   }
 }

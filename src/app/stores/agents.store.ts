@@ -1,5 +1,6 @@
 import { Injectable, computed, signal, effect, inject } from '@angular/core';
 import { AgentsApiService } from '../services/agents-api.service';
+import { StreamingApiService } from '../services/streaming-api.service';
 import { RequestStateStore } from './request-state.store';
 
 export interface Message {
@@ -45,6 +46,7 @@ export interface Task {
   mainAgentId?: string;
   agents: Agent[];
   isActive?: boolean;
+  processed_file_path?: string;
 }
 
 export interface AgentsState {
@@ -111,9 +113,55 @@ export class AgentsStore {
 
   private readonly requestStateStore = inject(RequestStateStore);
 
-  constructor(private agentsApi: AgentsApiService) {
+  constructor(private agentsApi: AgentsApiService, private streamingApi: StreamingApiService) {
     // Load initial data
     this.loadAgents();
+    
+    // Subscribe to streaming API updates
+    this.streamingApi.stream$.subscribe(chunk => {
+      if (chunk.type === 'task_completed' && chunk.data.chat_history) {
+        // Update our local chat data with the streaming API data
+        this._updateChatFromStreaming(chunk.data.task_id, chunk.data.chat_history);
+      }
+    });
+  }
+
+  private _updateChatFromStreaming(taskId: string, chatHistory: any[]): void {
+    // Convert streaming API chat format to our format
+    const messages = chatHistory.map(msg => ({
+      from: msg.from as 'user' | 'agent',
+      text: msg.text
+    }));
+
+    // Find or create chat for this task
+    const existingChat = this._chats().find(chat => chat.taskId === taskId);
+    
+    if (existingChat) {
+      // Update existing chat
+      this._chats.update(chats => 
+        chats.map(chat => 
+          chat.taskId === taskId 
+            ? { ...chat, messages }
+            : chat
+        )
+      );
+    } else {
+      // Create new chat
+      const task = this._tasks().find(t => t.id === taskId);
+      if (task) {
+        const chatId = 'c' + Date.now();
+        const chat: Chat = {
+          id: chatId,
+          title: `Új feladat – ${task.title}`,
+          ts: new Date().toISOString().slice(0, 16).replace('T', ' '),
+          taskId,
+          preview: messages[messages.length - 1]?.text.slice(0, 80) + '…' || '',
+          messages
+        };
+        this._chats.update(list => [chat, ...list]);
+        this.setActiveChatForTask(taskId, chatId);
+      }
+    }
   }
 
   // Actions
@@ -156,6 +204,11 @@ export class AgentsStore {
     this._activeAgentId.set(null);
   }
 
+  clearActiveTask(): void {
+    this._activeTaskId.set(null);
+    this._activeAgentId.set(null);
+  }
+
   setActiveAgent(agentId: string): void {
     this._activeAgentId.set(agentId);
   }
@@ -170,60 +223,153 @@ export class AgentsStore {
     if (!text.trim()) return;
     
     await this.requestStateStore.executeSendMessageRequest(async () => {
-      // If no active task, create a new task with agents
+      // If no active task, create a new task with agents using streaming API
       if (!this._activeTaskId()) {
-        await this.createTaskWithAgents(text);
+        await this.createTaskWithAgentsStreaming(text);
         return;
       }
 
-      // If we have an active task but no active agent, use the main agent
-      const currentAgent = this.currentAgent();
-      if (!currentAgent) {
-        const currentTask = this.currentTask();
-        if (currentTask && currentTask.agents.length > 0) {
-          // Set the first agent as active (main coordinator)
-          this.setActiveAgent(currentTask.agents[0].id);
-        }
-      }
-
+      // Use streaming API for chat messages
       const taskId = this._activeTaskId()!;
-      let chat = this.activeChat();
-      
-      if (!chat) {
-        const agent = this.currentAgent();
-        if (!agent) return; // Safety check
-        
-        const id = 'c' + Date.now();
-        chat = {
-          id,
-          title: `Új beszélgetés – ${agent.name}`,
-          ts: new Date().toISOString().slice(0, 16).replace('T', ' '),
-          taskId,
-          preview: text.slice(0, 80) + '…',
-          messages: []
-        };
-        this._chats.update(list => [chat!, ...list]);
-        this.setActiveChatForTask(taskId, chat.id);
+      await this.streamingApi.streamChatMessage(taskId, text);
+    });
+  }
+
+  async sendMessageWithFile(text: string, file: File): Promise<void> {
+    if (!text.trim() && !file) return;
+    
+    await this.requestStateStore.executeSendMessageRequest(async () => {
+      // If no active task, create a new task with agents using streaming API
+      if (!this._activeTaskId()) {
+        await this.createTaskWithAgentsStreamingWithFile(text, file);
+        return;
       }
 
-      // Add user message
-      this._chats.update(list => 
-        list.map(c => c.id === chat!.id 
-          ? { ...c, messages: [...c.messages, { from: 'user', text }] }
-          : c
-        )
+      // Use streaming API for chat messages with file
+      const taskId = this._activeTaskId()!;
+      await this.streamingApi.streamChatMessageWithFile(taskId, text, file);
+    });
+  }
+
+  private async createTaskWithAgentsStreaming(userMessage: string): Promise<void> {
+    try {
+      // First, create agent using the create-agent endpoint
+      const agentResponse = await this.agentsApi.createAgentFromMessage(userMessage);
+      
+      const task = await this.streamingApi.createTaskWithAgents(
+        `Új feladat - ${new Date().toLocaleDateString()}`,
+        userMessage.slice(0, 100) + '...',
+        userMessage
       );
 
-      // Simulate agent response
-      setTimeout(() => {
-        this._chats.update(list => 
-          list.map(c => c.id === chat!.id 
-            ? { ...c, messages: [...c.messages, { from: 'agent', text: '👍 Megkaptam. (Demo válasz)' }] }
-            : c
-          )
-        );
-      }, 300);
-    });
+      // Convert streaming API task format to our format
+      const convertedTask: Task = {
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        userMessage: task.user_message,
+        status: task.status as 'pending' | 'in-progress' | 'completed',
+        createdAt: task.created_at,
+        updatedAt: task.updated_at,
+        agents: task.agents.map((agent: any) => ({
+          id: agent.id,
+          name: agent.name === 'Fő Koordinátor' ? agentResponse.agentName : agent.name,
+          type: agent.type,
+          role: agent.role,
+          instructions: agent.instructions || [],
+          applicationAccess: agent.application_access || [],
+          resourceAccess: agent.resource_access || []
+        }))
+      };
+
+      // Add the new task to the store
+      this._tasks.update(tasks => [convertedTask, ...tasks]);
+      
+      // Set as active task
+      this._activeTaskId.set(convertedTask.id);
+      
+      // Create initial chat for this task
+      const initialChat: Chat = {
+        id: `chat_${Date.now()}`,
+        title: 'Új beszélgetés',
+        ts: new Date().toISOString(),
+        taskId: convertedTask.id,
+        messages: [
+          { from: 'user', text: userMessage }
+        ]
+      };
+      
+      this._chats.update(chats => [initialChat, ...chats]);
+      this._activeChatByTask.update(active => ({
+        ...active,
+        [convertedTask.id]: initialChat.id
+      }));
+
+    } catch (error) {
+      console.error('Error creating task with agents:', error);
+      throw error;
+    }
+  }
+
+  private async createTaskWithAgentsStreamingWithFile(userMessage: string, file: File): Promise<void> {
+    try {
+      // First, create agent using the create-agent endpoint
+      const agentResponse = await this.agentsApi.createAgentFromMessage(userMessage);
+      
+      const task = await this.streamingApi.createTaskWithAgentsWithFile(
+        `Új feladat - ${new Date().toLocaleDateString()}`,
+        userMessage.slice(0, 100) + '...',
+        userMessage,
+        file
+      );
+
+      // Convert streaming API task format to our format
+      const convertedTask: Task = {
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        userMessage: task.user_message,
+        status: task.status as 'pending' | 'in-progress' | 'completed',
+        createdAt: task.created_at,
+        updatedAt: task.updated_at,
+        agents: task.agents.map((agent: any) => ({
+          id: agent.id,
+          name: agent.name === 'Fő Koordinátor' ? agentResponse.agentName : agent.name,
+          type: agent.type,
+          role: agent.role,
+          instructions: agent.instructions || [],
+          applicationAccess: agent.application_access || [],
+          resourceAccess: agent.resource_access || []
+        }))
+      };
+
+      // Add the new task to the store
+      this._tasks.update(tasks => [convertedTask, ...tasks]);
+      
+      // Set as active task
+      this._activeTaskId.set(convertedTask.id);
+      
+      // Create initial chat for this task
+      const initialChat: Chat = {
+        id: `chat_${Date.now()}`,
+        title: 'Új beszélgetés',
+        ts: new Date().toISOString(),
+        taskId: convertedTask.id,
+        messages: [
+          { from: 'user', text: userMessage }
+        ]
+      };
+      
+      this._chats.update(chats => [initialChat, ...chats]);
+      this._activeChatByTask.update(active => ({
+        ...active,
+        [convertedTask.id]: initialChat.id
+      }));
+
+    } catch (error) {
+      console.error('Error creating task with agents and file:', error);
+      throw error;
+    }
   }
 
   private async createTaskWithAgents(userMessage: string): Promise<void> {
@@ -298,7 +444,7 @@ export class AgentsStore {
     this.setActiveChatForTask(taskId, chatId);
 
     // Add sub agents after a short delay
-    setTimeout(() => {
+      setTimeout(() => {
       this._agents.update(list => [...list, ...subAgents]);
     }, 500);
   }

@@ -50,6 +50,11 @@
     "serve": {
       "continuous": true,
       "executor": "@angular/build:dev-server",
+      "options": {
+        "ssl": true,
+        "sslCert": "./localhost+2.pem",
+        "sslKey": "./localhost+2-key.pem"
+      },
       "configurations": {
         "production": {
           "buildTarget": "my-angular-project:build:production"
