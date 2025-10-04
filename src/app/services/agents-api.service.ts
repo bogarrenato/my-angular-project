@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { delay, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { Agent, Chat } from '../stores/agents.store';
 
 @Injectable({
@@ -9,11 +9,10 @@ import { Agent, Chat } from '../stores/agents.store';
 export class AgentsApiService {
   
   private readonly createAgentUrl = 'https://simplyfire.ai:5000/agent-hub/api/create-agent';
-  
-  constructor(private http: HttpClient) {}
+  private readonly http = inject(HttpClient);
   
   // Mock data
-  private mockAgents: Agent[] = [
+  private readonly mockAgents: Agent[] = [
     {
       id: 'root',
       name: 'SimplyFire főmunkatárs',
@@ -63,7 +62,7 @@ export class AgentsApiService {
     },
   ];
 
-  private mockChats: Chat[] = [
+  private readonly mockChats: Chat[] = [
     {
       id: 'c1',
       title: 'Konnektor hozzáadása – OneDrive',
@@ -148,15 +147,13 @@ export class AgentsApiService {
     });
   }
 
-  async createAgentFromMessage(userMessage: string): Promise<{ agentName: string }> {
+  async createAgentFromMessage(userMessage: string): Promise<{ task: string; agentName: string; agentId: string }> {
     try {
-      const response = await this.http.put<{ agentName: string }>(this.createAgentUrl, {
-        task: userMessage
-      }).toPromise();
-      
-      if (!response) {
-        throw new Error('No response received from create-agent endpoint');
-      }
+      const response = await firstValueFrom(
+        this.http.put<{ task: string; agentName: string; agentId: string }>(this.createAgentUrl, {
+          task: userMessage
+        })
+      );
       
       return response;
     } catch (error) {

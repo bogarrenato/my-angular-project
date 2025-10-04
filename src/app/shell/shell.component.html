@@ -95,7 +95,7 @@
             aria-label="Keresés"
           />
           <h2>
-            <span>Előzmények</span>
+            <span class="heading">Előzmények</span>
           </h2>
           <div class="content">
             <div
@@ -152,9 +152,9 @@
                     <div class="title">{{ agent.name }}</div>
                     <div class="sub">{{ agent.role }} • {{ agent.status }}</div>
                   </div>
-                  <span class="badge agent-badge">{{
+              <!--     <span class="badge agent-badge">{{
                     agent.id.includes('main') ? 'FŐ' : 'SUB'
-                  }}</span>
+                  }}</span> -->
                 </div>
                 }
 
@@ -415,7 +415,8 @@
                     pTextarea
                     placeholder="Oldj meg egy feladatot… vagy húzz ide egy .txt fájlt"
                     #composer
-                    [(ngModel)]="messageText"
+                    [ngModel]="messageText()"
+                    (ngModelChange)="messageText.set($event)"
                     style="height: 124px; width: 100%"
                     aria-label="Üzenet"
                   ></textarea>
@@ -442,8 +443,8 @@
                   [class.sending]="isSendingMessage()"
                   style="
                     position: absolute;
-                    right: 30px;
-                    bottom: 25px;
+                    right: 10px;
+                    bottom: 15px;
                     height: 40px;
                     width: 40px;
                     border-radius: 50%;
@@ -471,7 +472,7 @@
         aria-label="Munkatárs beállítások"
       >
         <h2>
-          <span>Munkatárs beállítások</span>
+          <span class="heading">Munkatárs beállítások</span>
           <span class="pill">{{ tasks().length }} feladat</span>
         </h2>
         <div class="content">

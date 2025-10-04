@@ -1,3 +1,6 @@
+/* Google Fonts - Montserrat */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 /* PrimeNG v20 styles */
 @import 'primeicons/primeicons.css';
 @import 'primeflex/primeflex.css';
@@ -5,7 +8,7 @@
 /* CSS variables for both themes */
 :root {
   --radius: 16px;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  /*   --shadow: 0 10px 30px rgba(0, 0, 0, 0.35); */
   --p-button-primary-color: red;
 
   [data-theme='dark'] {
@@ -15,6 +18,7 @@
     --add-agent-background-color: #0b1120;
     --header-background-color: #0b1120;
     --button-success-background-color: #fb8d1a;
+    --button-accent-color: #ff7a1a;
     --p-button-primary-color: white;
     --p-button-primary-active-color: #fb8d1a;
     --p-button-primary-focus-color: red;
@@ -28,7 +32,7 @@
     --border: #1f2937;
     --accent: #ff7a1a;
     --accent-2: #3aaaff;
-    --chip: #1b2233;
+    --chip: #0d0d0e;
     --surface-ground: #0b0e14;
     --surface-section: #121826;
     --surface-card: #121826;
@@ -36,11 +40,15 @@
     --action-icons-color: #2255bc;
     --text-color: #e5e7eb;
     --text-color-secondary: #96a0b5;
+    --heading: white;
+    --hint: #d8d9d9;
     --text-placeholder: #f6f6f6f7;
     --p-textarea-color: rgb(229, 229, 229);
     --p-button-primary-color: rgb(41, 41, 41);
-    --p-inputtext-border-color:  rgb(177, 181, 177);
+    --p-inputtext-border-color: rgb(177, 181, 177);
     --p-inputtext-color: rgb(231, 229, 229);
+    --user-bubble-from: #1d263a;
+    --user-bubble-to: #121a2c;
     /* --card-background-color: #040a44; */
     /* --p-inputtext-placeholder-color: red; */
   }
@@ -48,38 +56,43 @@
   [data-theme='light'] {
     --p-inputtext-placeholder-color: red;
     /* --p-button-primary-color: rgb(255, 255, 255); */
-    --p-inputtext-border-color:  rgb(152, 155, 152);
+    --p-inputtext-border-color: rgb(152, 155, 152);
     --p-textarea-color: rgb(70, 63, 63);
     --p-inputtext-color: rgb(70, 63, 63);
+    --heading: #080808;
     --text-placeholder: #b2b2b2f7;
     --p-button-primary-hover-color: rgb(237, 234, 234);
     --p-button-primary-focus-color: red;
     --p-button-primary-active-color: rgb(237, 234, 234);
     --p-button-primary-color: rgb(237, 234, 234);
-    --p-button-primary-hover-background: #fb8d1a;
-    --card-background-color: #d5d6d8;
- 
+    --p-button-primary-hover-background: #1a74fb;
+    --button-accent-color: #2563eb;
+    --card-background-color: #2563eb;
+    --text-light: #ffffff;
     --agent-background-color: #f0f0f0;
     --header-background-color: #fb8d1a;
     --add-agent-background-color: #fb8d1a;
     --button-success-background-color: #fb8d1a;
-    --p-button-text-primary-color: #fb8d1a;
-    --bg: #ffffff;
-    --panel: #f8f9fa;
+    --p-button-text-primary-color: var(--button-accent-color);
+    --bg: #efefef;
+    --panel: #2563eb;
     --panel-2: #f4f4f4;
-    --text: #4d4d4e;
+    --text: #ffffff;
     --muted: #b2b2b2f7;
     --action-icons-color: #2380dd;
     --border: #dee2e6;
     --accent: #ff7a1a;
     --accent-2: #3aaaff;
-    --chip: #e9ecef;
+    --chip: #212121;
     --surface-ground: #f6f4f4;
     --surface-section: #f8f9fa;
     --surface-card: #ffffff;
     --surface-border: #dee2e6;
     --text-color: #212529;
+    --hint: rgba(49, 56, 86, 0.8);
     --text-color-secondary: #6c757d;
+    --user-bubble-from: #3b82f6;
+    --user-bubble-to: #1e40af;
   }
 }
 
@@ -95,15 +108,10 @@ body {
 }
 
 body {
-  background: linear-gradient(
-    180deg,
-    var(--bg) 0%,
-    var(--bg) 40%,
-    var(--panel-2) 100%
-  );
+  background: var(--bg);
   /* color: var(--text); */
-  font: 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
-    'Helvetica Neue', Arial;
+  font: 15px/1.5 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* Layout shell */
@@ -111,12 +119,12 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(
+  /*   background: linear-gradient(
     180deg,
     var(--bg) 0%,
     var(--bg) 40%,
     var(--panel-2) 100%
-  );
+  ); */
 }
 
 /* Header styling */
@@ -186,7 +194,8 @@ header {
 }
 
 .p-button.accent {
-  background: linear-gradient(180deg, #ff7a1a, #e5670d);
+  /* background: linear-gradient(180deg, #ff7a1a, #e5670d); */
+  background: var(--button-accent-color);
   border-color: #ff8a39;
   /* color: #0b0e14; */
   font-weight: 800;
@@ -396,6 +405,7 @@ aside:last-of-type.right-aside-open {
 .agent .meta .sub {
   /* color: var(--muted); */
   font-size: 12px;
+  color: var(--text);
 }
 
 .agent .badge {
@@ -468,6 +478,7 @@ aside:last-of-type.right-aside-open {
 .task-sub {
   /* color: var(--muted); */
   font-size: 12px;
+  color: var(--text);
 }
 
 .task-badge {
@@ -812,15 +823,23 @@ aside:last-of-type.right-aside-open {
 }
 
 .agent-bubble {
-  background: linear-gradient(180deg, #122038, #0f172a);
-  border: 1px solid #2a3650;
+  background: linear-gradient(
+    180deg,
+    var(--user-bubble-from),
+    var(--user-bubble-to)
+  );
+  border: 1px solid var(--user-bubble-border);
   border-bottom-left-radius: 4px;
   color: #e2e8f0;
 }
 
 .user-bubble {
-  background: linear-gradient(180deg, #1d263a, #121a2c);
-  border: 1px solid #2a3650;
+  background: linear-gradient(
+    180deg,
+    var(--user-bubble-from),
+    var(--user-bubble-to)
+  );
+  border: 1px solid var(--user-bubble-border);
   border-bottom-right-radius: 4px;
   color: #f1f5f9;
   margin-left: auto;
@@ -1027,7 +1046,7 @@ aside:last-of-type.right-aside-open {
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border-color: var(--accent-2);
-  background: linear-gradient(135deg, var(--chip), var(--accent-2));
+/*   background: linear-gradient(135deg, var(--chip), var(--accent-2)); */
   animation: chipHoverPulse 1s ease-out;
 }
 
@@ -1067,7 +1086,7 @@ aside:last-of-type.right-aside-open {
 }
 
 .chip-container:hover .chip {
-  background: var(--panel-2);
+  /* background: var(--panel-2); */
   border-color: var(--accent-2);
 }
 
@@ -1506,8 +1525,15 @@ aside:last-of-type.right-aside-open {
 }
 
 .hint {
-  color: var(--muted);
+  color: var(--hint);
   font-size: 12px;
+}
+
+.heading {
+  color: var(--heading);
+  /* font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px; */
 }
 
 /* Placeholder styling - much dimmer */

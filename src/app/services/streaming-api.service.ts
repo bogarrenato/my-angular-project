@@ -1,6 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject, BehaviorSubject } from 'rxjs';
+import { Subject, firstValueFrom } from 'rxjs';
 
 export interface StreamChunk {
   type: 'chunk' | 'agent_created' | 'task_completed' | 'error';
@@ -82,18 +82,18 @@ export class StreamingApiService {
   });
   
   // Stream subjects for real-time updates
-  private streamSubject = new Subject<StreamChunk>();
+  private readonly streamSubject = new Subject<StreamChunk>();
   public stream$ = this.streamSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   async createTaskWithAgents(title: string, description: string, userMessage: string): Promise<Task> {
     try {
-      const response = await this.http.post<Task>(`${this.baseUrl}/tasks`, {
+      const response = await firstValueFrom(this.http.post<Task>(`${this.baseUrl}/tasks`, {
         title,
         description,
         user_message: userMessage
-      }).toPromise();
+      }));
       
       if (response) {
         this._tasks.update(tasks => [response, ...tasks]);
@@ -218,6 +218,7 @@ export class StreamingApiService {
           });
         }
         
+        // Update chat history with the complete conversation
         if (chunk.data.chat_history) {
           this._updateTaskChatHistory(chunk.data.task_id, chunk.data.chat_history);
         }
